@@ -278,7 +278,7 @@ Note: You can build various Resnets with the module, such as from Resnet18 to Re
 
 
 
-* Version 1 Residual Module : stacks of (3 x 3) - (3 x 3)
+#### Version 1 Residual Module : stacks of (3 x 3) - (3 x 3)
 
 * Example : (3 x 3, 16) x 2 - (3 x 3, 32) x 2 , Input 32 x 32 RGB
 
@@ -313,22 +313,25 @@ And so on..
 * This is the same model with the version 1 in Keras implementation
 
 ```python
-resnet30 = resnet(input_shape = (32,32,3), y_shape = 1, activation = 'relu', num_class = 10, kernel_regularizer = keras.regularizers.l2(weight_decay), kernel_initializer = 'he_normal')
+resnet30 = resnet(input_shape = (32,32,3), y_shape = 1, activation = 'relu', 
+                  num_class = 10, kernel_regularizer = keras.regularizers.l2(weight_decay), kernel_initializer = 'he_normal')
 
-resnet30.build_custom_resnet(filter_structure = [16, 32, 64], structure_stack = [3,3,3], start_filter = 16, start_kernel = 3, start_strides = 1)
+resnet30.build_custom_resnet(filter_structure = [16, 32, 64], structure_stack = [3,3,3],
+                             start_filter = 16, start_kernel = 3, start_strides = 1)
 ```
 
 
 
-* Version 2 Residual Module : stacks of (1 x 3 x 1), known as bottleneck layer
-
-* Example : (1 x 3 x 1, (16, 64)) x 2 - (1 x 3 x 1, (64, 128)) x 2, Input 32 x 32 RGB
+#### Version 2 Residual Module : stacks of (1 x 3 x 1), known as bottleneck layer
 
 In the [paper](https://arxiv.org/pdf/1603.05027.pdf), the location of BN and Activation layer in the bottleneck layers were importantly discussed.
 
 * Full pre-activation
 
 ![r](images/resnetpreact.PNG)
+
+
+* Example : (1 x 3 x 1, (16, 64)) x 2 - (1 x 3 x 1, (64, 128)) x 2, Input 32 x 32 RGB
 
 
 |                      |Input (32 x 32 RGB image)  |             | 
@@ -372,7 +375,9 @@ Notice the location of the BatchNormalization and Activation layers in the modul
 * This is the same model with the version 2 in the Keras implementation
 
 ```python
-resnet30_ver2 = resnet(input_shape = (32,32,3), y_shape = 1, activation = 'relu', num_class = 10, kernel_regularizer = keras.regularizers.l2(weight_decay), kernel_initializer = 'he_normal')
+resnet30_ver2 = resnet(input_shape = (32,32,3), y_shape = 1, activation = 'relu', 
+                       num_class = 10, kernel_regularizer = keras.regularizers.l2(weight_decay), kernel_initializer = 'he_normal')
 
-resnet30_ver2.build_custom_resnet(filter_structure = [16,64,128], filter_structure2 = [64, 128, 256], structure_stack = [3,3,3], start_filter = 16, start_kernel = 3, start_strides = 1)
+resnet30_ver2.build_custom_resnet(filter_structure = [16,64,128], filter_structure2 = [64, 128, 256], structure_stack = [3,3,3], 
+                                  start_filter = 16, start_kernel = 3, start_strides = 1)
 ```
