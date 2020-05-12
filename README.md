@@ -379,11 +379,13 @@ Notice the location of the BatchNormalization and Activation layers in the modul
 * This is the same model with the version 2 in the Keras implementation
 
 ```python
-resnet_ver2 = resnet(input_shape = (32,32,3), y_shape = 1, activation = 'relu', 
-                       num_class = 10, kernel_regularizer = keras.regularizers.l2(weight_decay), kernel_initializer = 'he_normal',
-                      epochs = 200, batch_size = 128)
+#Instantiate resnet class
+resnet_ver2 = resnet(input_shape = (32,32,3), y_shape = 1, activation = 'relu', num_class = 10, 
+                     kernel_regularizer = keras.regularizers.l2(weight_decay), 
+                     kernel_initializer = 'he_normal',
+                     epochs = 200, batch_size = 128)
 
-#build resnet30 ver2 model
+#build resnet ver2 model - returns keras Model instance
 resnet_ver2.build_custom_resnet(filter_structure = [16,64,128], filter_structure2 = [64, 128, 256], structure_stack = [3,3,3], 
                                   start_filter = 16, start_kernel = 3, start_strides = 1)
 
@@ -391,15 +393,18 @@ resnet_ver2.build_custom_resnet(filter_structure = [16,64,128], filter_structure
 
 #callbacks
 def scheduler(epoch):
-    if epoch < 81:
+    if epoch < 80:
         return 0.1
-    if epoch < 122:
+    if epoch < 130:
         return 0.01
     return 0.001
 
 lr_scheduler = keras.callbacks.LearningRateScheduler(scheduler)
 
-#data augmentation
+#without data augmentation
+#resnet_ver2.fit(X_train = X_train, y_train = y_train, X_valid = X_valid, y_valid = y_valid, callbacks = [lr_scheduler])
+
+#data augmentation - Arguments of (trainset, ImageDataAugmentation arguments1, argument2, ..)
 resnet_ver2.image_aug(X_train, horizontal_flip=True,
                                  width_shift_range=0.125,
                                  height_shift_range=0.125,
@@ -409,7 +414,7 @@ resnet_ver2.fit_generator(X_train = X_train, y_train = y_train,
                             X_valid = X_valid, y_valid = y_valid,
                            callbacks = [lr_scheduler])
 
-#resnet_ver2.fit(X_train = X_train, y_train = y_train, X_valid = X_valid, y_valid = y_valid, callbacks = [lr_scheduler])
+
 
 resnet_ver2.evaluate(X_valid = X_valid, y_valid = y_valid)
 fitted_value = resnet_ver2.predict(X_new = X_test)
