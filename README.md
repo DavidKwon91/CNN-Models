@@ -15,7 +15,6 @@ They are developed with Keras.
 2. [Alexnet](#Alexnet)
 
 ## Lenet
-1. Lenet
 * [Lenet Paper](http://yann.lecun.com/exdb/publis/pdf/lecun-01a.pdf)
 
 * You can customize..
@@ -40,8 +39,7 @@ They are developed with Keras.
 
 
 
-
-2. Alexnet
+## Alexnet
 * [Alexnet Paper](https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf)
 
 The input shape that is stated in the paper is 224 x 224 x 3, but it must be 227 x 227 x 3 as stated in [cs231n](https://cs231n.github.io/convolutional-networks/)
