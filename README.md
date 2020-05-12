@@ -221,4 +221,10 @@ The structure of each versions are defined as below:
 Note: Mini version is structured as stated in the paper, [Mini Googlenet](https://arxiv.org/pdf/1611.03530.pdf)
 
 
+* Original Architecture (from the paper)
+
 ![g](images/googlenet.PNG)
+
+* MiniGooglenet Architecture
+
+![m](images/mini.PNG)
