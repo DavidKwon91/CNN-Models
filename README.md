@@ -286,19 +286,23 @@ Note: You can build various Resnets with the module, such as from Resnet18 to Re
 |                    |Input (32 x 32 RGB image)|        | 
 |:------------------:|:-----------------------:|:------:|
 |                    |conv3-16, stride 1       |        |
+|                    |First Module starts(3 x 3, 16)|   |
 |                    |BN1                      |        |
 |                    |Act1                     |        |
 |c1 3x3, 16 (BN, Act)|                         |        |
 |c2 3x3, 16 (BN)     |                         |        |
 |                    |Add1 (c2, Act1)          |        |
+|                    |Second Module starts(3 x 3, 16)|  |
 |                    |Act2                     |        |
 |c1 3x3, 16 (BN, Act)|                         |        |
 |c2 3x3, 16 (BN)     |                         |        |
 |                    |Add2 (c2, Act2)          |        |
+|                    |First Module starts(3 x 3, 32)|   |
 |                    |Act3                     |        |
 |c1 3x3, 32 (BN, Act)|                         |        |
 |c2 3x3, 32 (BN)     |                         |identity c1 1x1, 32 strides 2 (from Act3)|
 |                    |Add3 (c2, identity c1)   |        |
+|                    |Second Module starts(3 x 3, 32)|  |
 |                    |Act4                     |        |
 |c1 3x3, 32 (BN, Act)|                         |        |
 |c2 3x3, 32 (BN)     |                         |        |
@@ -331,22 +335,22 @@ In the [paper](https://arxiv.org/pdf/1603.05027.pdf), the location of BN and Act
 |c1 1 x 1, 16 (BN, Act)|                           |             |
 |c2 3 x 3, 16 (BN, Act)|                           |             |
 |c3 1 x 1, 64          |                           |identity c1 1 x 1, 64 strides 1 (from Act1)|
-|                      |Second Module starts(1 x 3 x 1, (16,64)) |        |
 |                      |Add1 (c3, identity c1), 64 |             |
+|                      |Second Module starts(1 x 3 x 1, (16,64)) |        |
 |BN2                   |                           |             |
 |Act2                  |                           |             |
 |c1 1 x 1, 16 (BN, Act)|                           |             |
 |c2 3 x 3, 16 (BN, Act)|                           |             |
 |c3 1 x 1, 64          |                           |             |
-|                      |First Module starts(1 x 3 x 1, (64,128)) |        |
 |                      |Add2 (c3, Add1), 64        |             |
+|                      |First Module starts(1 x 3 x 1, (64,128)) |        |
 |BN3                   |                           |             |
 |Act3                  |                           |             |
 |c1 1 x 1, 64 (BN, Act) strides 2|                 |             |
 |c2 3 x 3, 64 (BN, Act)|                           |             |
 |c3 1 x 1, 128         |                           |identity c2 1 x 1, 128 strides 2 (from Add2)|
-|                      |Second Module starts(1 x 3 x 1, (64,128))|        |
 |                      |Add3 (c3, identity c2), 128|             |
+|                      |Second Module starts(1 x 3 x 1, (64,128))|        |
 |BN4                   |                           |             |
 |Act4                  |                           |             |
 |c1 1 x 1, 64 (BN, Act)|                           |             |
