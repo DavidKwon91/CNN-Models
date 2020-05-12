@@ -3,11 +3,12 @@
 This repository is to introduce some classic CNN models. Also, their variants or customized version of them are discussed. 
 
 Most of their architecture are structured for the shape of various image datasets, such as ImageNet or cifar. 
-Their architectures are customizable with these modules in this repository.
+Their architectures are customizable with these modules in this repository 
 
-You will be able to build original or customized version of the classic CNN models, train, evaluate, and predict them with the modules. 
+You will be able to build original or customized version of the classic CNN models, implement data augmenetation, train, evaluate, and predict them with the modules. 
 
-They are developed with Keras. 
+Simple implementation will be addressed in the very bottom of this with Resnet. 
+
 
 # Models
 
@@ -313,10 +314,13 @@ And so on..
 * This is the same model with the version 1 in Keras implementation
 
 ```python
-resnet30 = resnet(input_shape = (32,32,3), y_shape = 1, activation = 'relu', 
+
+weight_decay = 1e-5
+
+resnet_ver1 = resnet(input_shape = (32,32,3), y_shape = 1, activation = 'relu', 
                   num_class = 10, kernel_regularizer = keras.regularizers.l2(weight_decay), kernel_initializer = 'he_normal')
 
-resnet30.build_custom_resnet(filter_structure = [16, 32, 64], structure_stack = [3,3,3],
+resnet_ver1.build_custom_resnet(filter_structure = [16, 32, 64], structure_stack = [3,3,3],
                              start_filter = 16, start_kernel = 3, start_strides = 1)
 ```
 
@@ -375,9 +379,39 @@ Notice the location of the BatchNormalization and Activation layers in the modul
 * This is the same model with the version 2 in the Keras implementation
 
 ```python
-resnet30_ver2 = resnet(input_shape = (32,32,3), y_shape = 1, activation = 'relu', 
-                       num_class = 10, kernel_regularizer = keras.regularizers.l2(weight_decay), kernel_initializer = 'he_normal')
+resnet_ver2 = resnet(input_shape = (32,32,3), y_shape = 1, activation = 'relu', 
+                       num_class = 10, kernel_regularizer = keras.regularizers.l2(weight_decay), kernel_initializer = 'he_normal',
+                      epochs = 200, batch_size = 128)
 
-resnet30_ver2.build_custom_resnet(filter_structure = [16,64,128], filter_structure2 = [64, 128, 256], structure_stack = [3,3,3], 
+#build resnet30 ver2 model
+resnet_ver2.build_custom_resnet(filter_structure = [16,64,128], filter_structure2 = [64, 128, 256], structure_stack = [3,3,3], 
                                   start_filter = 16, start_kernel = 3, start_strides = 1)
+
+
+
+#callbacks
+def scheduler(epoch):
+    if epoch < 81:
+        return 0.1
+    if epoch < 122:
+        return 0.01
+    return 0.001
+
+lr_scheduler = keras.callbacks.LearningRateScheduler(scheduler)
+
+#data augmentation
+resnet_ver2.image_aug(X_train, horizontal_flip=True,
+                                 width_shift_range=0.125,
+                                 height_shift_range=0.125,
+                                 fill_mode='constant',cval=0.)
+
+resnet_ver2.fit_generator(X_train = X_train, y_train = y_train,
+                            X_valid = X_valid, y_valid = y_valid,
+                           callbacks = [lr_scheduler])
+
+#resnet_ver2.fit(X_train = X_train, y_train = y_train, X_valid = X_valid, y_valid = y_valid, callbacks = [lr_scheduler])
+
+resnet_ver2.evaluate(X_valid = X_valid, y_valid = y_valid)
+fitted_value = resnet_ver2.predict(X_new = X_test)
+
 ```
