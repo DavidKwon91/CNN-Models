@@ -295,10 +295,8 @@ resnet30_ver2.build_custom_resnet(filter_structure = [16,64,128], filter_structu
 
 * Version 1 Residual Module : stacks of (3 x 3) - (3 x 3)
 
-* Example : (3 x 3, 16) x 2 - (3 x 3, 32) x 2 , Input 32x32 RGB
+* Example : (3 x 3, 16) x 2 - (3 x 3, 32) x 2 , Input 32 x 32 RGB
 
-
-* Input
 
 |                    |Input (32 x 32 RGB image)|        | 
 |:------------------:|:-----------------------:|:------:|
@@ -313,47 +311,42 @@ resnet30_ver2.build_custom_resnet(filter_structure = [16,64,128], filter_structu
 |c2 3x3, 16 (BN)     |                         |        |
 |                    |Add2 (c2, Act2)          |        |
 |                    |Act3                     |        |
-|c1 3x3, 32 (BN, Act)|                         |identity Conv1 1x1, 32 strides 2|
-|c2 3x3, 32 (BN)     |                         |                                |
-|                    |Add3 (c2, identity Conv1)|        |
+|c1 3x3, 32 (BN, Act)|                         |identity c1 1x1, 32 strides 2|
+|c2 3x3, 32 (BN)     |                         |        |
+|                    |Add3 (c2, identity c1)   |        |
+|                    |Act4                     |        |
+|c1 3x3, 32 (BN, Act)|                         |        |
+|c2 3x3, 32 (BN)     |                         |        |
+|                    |Add4 (c2, Act4)          |        |
 
+And so on.. 
 
+* Version 2 Residual Module : stacks of (1 x 3 x 1), known as bottleneck layer
 
+* Example : (1 x 3 x 1, (16, 64)) - (1 x 3 x 1, (64, 128)), Input 32 x 32 RGB
 
+In the [paper](https://arxiv.org/pdf/1603.05027.pdf), the location of BN and Activation layer in the bottleneck layers were importantly discussed.
 
+|                      |Input (32 x 32 RGB image)  |        | 
+|:--------------------:|:-------------------------:|:------:|
+|                      |conv3-16, stride 1         |        |
+|                      |BN1                        |        |
+|                      |Act1                       |        |
+|c1 1 x 1, 16 (BN, Act)|                           |        |
+|c2 3 x 3, 16 (BN, Act)|                           |        |
+|c3 1 x 1, 64          |                           |identity c1 1 x 1, 64 strides 2 (from Act1)|
+|                      |Add1 (c3, identity c1), 64 |        |
+|                      |BN2, Act2                  |        |
+|c1 1 x 1, 16 (BN, Act)|                           |        |
+|c2 3 x 3, 16 (BN, Act)|                           |        |
+|c3 1 x 1, 64          |                           |        |
+|                      |Add2 (c3, Add1), 64        |        |
+|BN3, Act3             |                           |        |
+|c1 1 x 1, 64 (BN, Act)|                           |        |
+|c2 3 x 3, 64 (BN, Act)|                           |        |
+|c3 1 x 1, 128         |                           |identity c2 1 x 1, 128 strides 2 (from Add2)|
+|                      |Add3 (c3, identity c2), 128|        |
 
-* First Residual Modules (3 x 3, 16), which is the very first of first residual module
-The residual module right after the first conv layer. 
+And so on.. 
 
-|BatchNormalization (BN1)   |
-|:-------------------------:|               
-|Act1   (BN1)               |
-|c1 3x3, 16 (BN, Act)       |
-|c2 3x3, 16 (BN)            |
-|Add1 (c2, Act1)            |
- 
-
-
-* Second Residual Modules (3 x 3, 16)
-
-|Add1 (the end of the first residual modules module 16) |
-|:--------------------------------:|               
-|Act2 (Add1)                       |
-|c1 3x3, 16 (BN, Act)              |
-|c2 3x3, 16 (BN)                   |
-|Add2 (c2, Act2)                   |
-
-
-* First Residual Modules (3 x 3, 32), where the filter is changed from 16 to 32
-
-
-|                | Add2 (the end of the second residual modules 16)|       |
-|:--------------:|:-----------------------------------------------:|:-----:|      
-|                |Act3 (Add2)                                      |       |
-|c1 3x3, 32 (BN, Act)|                      |identity Conv1 1x1, 32 strides 2|
-|c2 3x3, 32 (BN)     |                      |                               |
-|                |  Add3 (c2, identity Conv1)       |       |
-
-
-And so on..
-
+Notice the location of the BatchNormalization and Activation layers in the modules. 
