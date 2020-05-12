@@ -328,7 +328,7 @@ In the [paper](https://arxiv.org/pdf/1603.05027.pdf), the location of BN and Act
 
 * Full pre-activation
 
-![r](resnetpreact.PNG)
+![r](images/resnetpreact.PNG)
 
 
 |                      |Input (32 x 32 RGB image)  |             | 
