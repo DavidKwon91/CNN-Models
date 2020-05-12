@@ -221,5 +221,4 @@ The structure of each versions are defined as below:
 Note: Mini version is structured as stated in the paper, [Mini Googlenet](https://arxiv.org/pdf/1611.03530.pdf)
 
 
-![](Googlenet_model.png)
-![g](images/Googlenet_model.png)
+![g](images/ggnet.png)
