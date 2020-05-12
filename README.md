@@ -299,7 +299,7 @@ resnet30_ver2.build_custom_resnet(filter_structure = [16,64,128], filter_structu
 |       |BatchNormalization(if first layer of first block) or Add(the end of module) |    |
 |:--------------:|:---------------------------------------:|:-----:|                 
 |                |Activation (from previous layer)         |       |
-|c1 3x3 (BN, Act)|                                         |       |
+|c1 3x3 (BN, Act)|                                         |identity conv 1x1, strides 2|
 |c2 3x3 (BN)     |                                         |       |
 |                |  Add(c2, Activation from top of module) |       |
 
