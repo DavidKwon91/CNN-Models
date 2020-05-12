@@ -228,3 +228,78 @@ Note: Mini version is structured as stated in the paper, [Mini Googlenet](https:
 * MiniGooglenet Architecture
 
 ![m](images/mini.PNG)
+
+
+
+
+## Xception
+
+* [Xception paper](https://arxiv.org/pdf/1610.02357.pdf)
+
+* You can customize..
+    - activation
+    - weight initializer
+    - regularizer
+    - optimizer
+    - structure (depends on input shape)
+    
+Note: For structure of customized Xception, you will be structuring modules called flow and connect along them to build whole model. Examples are implemented in the code.
+
+
+* Original Architecture
+
+![x](images/xception.PNG)
+
+
+* Customized mini version of Xception was implemented in the code
+
+Reference : [Mini Xception](https://github.com/beinanwang/tf-slim-xception-cifar-10)
+
+
+## Resnet
+
+
+* [Resnet Paper](https://arxiv.org/pdf/1512.03385.pdf)
+* [Resnet v2 Paper](https://arxiv.org/pdf/1603.05027.pdf)
+
+
+* You can customize..
+    - activation
+    - weight initializer
+    - regularizer
+    - optimizer
+    - structure (depends on input shape)
+    
+Note: You can build various Resnets with the module, such as from Resnet18 to Resnet152. 
+
+
+* Simple Example as Keras Resnet implementation 
+[Keras Resnet Implementation](https://keras.io/examples/cifar10_resnet/)
+
+
+* This is the same model with the version 1 in Keras implementation
+
+```python
+resnet30 = resnet(input_shape = (32,32,3), y_shape = 1, activation = 'relu', num_class = 10, kernel_regularizer = keras.regularizers.l2(weight_decay), kernel_initializer = 'he_normal')
+
+resnet30.build_custom_resnet(filter_structure = [16, 32, 64], structure_stack = [3,3,3], start_filter = 16, start_kernel = 3, start_strides = 1)
+```
+
+* This is the same model with the version 2 in the Keras implementation
+
+```python
+resnet30_ver2 = resnet(input_shape = (32,32,3), y_shape = 1, activation = 'relu', num_class = 10, kernel_regularizer = keras.regularizers.l2(weight_decay), kernel_initializer = 'he_normal')
+
+resnet30_ver2.build_custom_resnet(filter_structure = [16,64,128], filter_structure2 = [64, 128, 256], structure_stack = [3,3,3], start_filter = 16, start_kernel = 3, start_strides = 1)
+```
+
+* Version 1 Residual Module Architecture Example
+
+
+|       |BatchNormalization(if first layer of first block) or Add(the end of module) |    |
+|                |Activation (from previous layer)         |       |
+|c1 3x3 (BN, Act)|                                         |       |
+|c2 3x3 (BN)     |                                         |       |
+|                |  Add(c2, Activation from top of module) |       |
+
+
