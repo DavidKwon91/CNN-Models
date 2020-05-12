@@ -32,6 +32,7 @@ def simple_lenet(input_shape, num_class):
     
 simple_lenet(input_shape = (32,32,3), num_class = 10).summary()
 
+keras.utils.plot_model(simple_lenet(input_shape = (32,32,3), num_class = 10), show_shapes= True)
 
 #You can customize of the lenet model
 
@@ -167,7 +168,8 @@ class lenet():
         pred = self.model.predict(X_new)
         return pred
     
-    
+
+
     
 #original Lenet model example
 
@@ -189,3 +191,12 @@ ln.model.summary()
 ln_custom = lenet(input_shape = (32,32,3), y_shape = 1, activation = 'relu', num_class = 10)
 ln_custom.build_model(structure = (6, 'M', 16, 'M'))
 ln_custom.model.summary()
+
+
+weight_decay = 1e-5
+ln_custom2 = lenet(input_shape = (32,32,3), y_shape = 1, activation = 'relu', num_class = 10,
+                  kernel_initializer = initializers.he_normal(), kernel_regularizer = regularizers.l2(weight_decay),
+                  opt = optimizers.SGD(lr = 1e-3, momentum = 0.9, nesterov = True))
+
+ln_custom2.build_model(structure = (6,'M',16,32,'M'))
+ln_custom2.model.summary()
