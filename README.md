@@ -222,3 +222,4 @@ Note: Mini version is structured as stated in the paper, [Mini Googlenet](https:
 
 
 ![Googlenet](Googlenet_model.png)
+![Googlenet](./pictures/Googlenet_model.png)
