@@ -89,9 +89,60 @@ The input shape that is stated in the paper is 224 x 224 x 3, but it must be 227
 |FC           |10  |       |           |       |softmax   |
 
 
+Note: Batch Normalization is used instead of LRN introduced in the paper at the first and the second conv layer. 
+Dropout : 0.5
+
+3. Network In Network
+
+* [Network In Network Paper](https://arxiv.org/pdf/1312.4400.pdf)
+
+* You can customize..
+    - activation
+    - weight initializer
+    - regularizer
+    - optimizer
+    - structure (depends on input shape)
+    
+For structure of customized NIN, you will be structuring modules called the mlpconv blocks and connect along them to build whole model. Examples are implemented in the code. 
+
+
+* mlpconv layers
+
+The structure of mlpconv layers are similar to the below
+
+
+|Layer               |Maps|Kernel Size |
+|:------------------:|:--:|:----------:|
+|...Previous layers..|....|            |
+|Conv2 (BN, Act)     |....|first kernel|
+|Conv2 (BN, Act)     |....|1 x 1       |
+|Conv2 (BN, Act)     |....|1 x 1       |
+|MaxPooling          |....|3 x 3       |
+|Dropout             |    |            |
+
 Note: 
-    - Batch Normalization is used instead of LRN introduced in the paper
-    - Normalization is applied into the first and the second conv layer as stated in the paper
+1. first kernel has to be defined
+2. For the last mlpconv layers, it takes Global Avg Pooling instead of Max Pooling, and Activation would be softmax.  
+
+The structure of NIN model for cifar10 dataset as an example would be
 
 
-3. 
+
+
+|Structure               | Layers           |
+|:----------------------:|:----------------:|
+|                 Input (32 x 32 RGB)
+|mlpconv layers (BN, Act)|Conv2 (192-5)     |
+                          Conv2 (160-1)
+                          Conv2 (96-1)
+|                         MaxPooling (96-3) |
+                          Dropout(0.5)
+|mlpconv layers (BN, Act)|Conv2 (192-5)     |
+                          Conv2 (192-5)
+                          Conv2 (192-5)
+|                         MaxPooling (192-3)|
+                          Dropout(0.5)
+|mlpconv layers (BN, Act)|Conv2 (192-3)     |
+                          Conv2 (192-1)
+|                         Global Avg Pooling|
+|                          Activation       |
