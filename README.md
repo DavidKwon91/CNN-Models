@@ -35,14 +35,22 @@ They are developed with Keras.
 |FC              |       |10     |           |       |softmax   |
 
 
+
+
 2. Alexnet
-* [Alexnet](https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf)
+* [Alexnet Paper](https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf)
 
 The input shape that is stated in the paper is 224 x 224 x 3, but it must be 227 x 227 x 3 as stated in [cs231n](https://cs231n.github.io/convolutional-networks/)
 
+* You can customize..
+    - activation
+    - weight initializer
+    - regularizer
+    - optimizer
+
 * Two versions of Alexnet available
-    1. orginial version
-    2. mini version
+    1. Orginial version
+    2. Mini version
 
 
 * Original Architecture
@@ -63,8 +71,27 @@ The input shape that is stated in the paper is 224 x 224 x 3, but it must be 227
 |FC             |     |1000     |           |       |softmax   |
 
 
-- Batch Normalization is used instead of LRN introduced in the paper
-- Normalization is applied into the first and the second conv layer as stated in the paper
+
+* Mini version Architecture
+
+|Layer        |Maps|Size   |Kernel Size|Strides|Activation|
+|:-----------:|:--:|:-----:|:---------:|:-----:|:--------:|
+|Input        |3   |32 x 32|           |       |          |
+|Conv2(BN,Act)|64  |16 x 16|3 x 3      |2      |relu      |
+|MaxPooling   |64  |8 x 8  |2 x 2      |2      |relu      |
+|Conv2(BN,Act)|192 |8 x 8  |3 x 3      |1      |relu      |
+|MaxPooling   |192 |4 x 4  |2 x 2      |2      |relu      |
+|Conv2(Act)   |256 |4 x 4  |3 x 3      |1      |relu      |
+|Conv2(Act)   |256 |4 x 4  |3 x 3      |1      |relu      |
+|MaxPooling   |256 |1 x 1  |2 x 2      |2      |relu      |
+|FC(Dropout)  |512 |       |           |       |relu      |
+|FC(Dropout)  |256 |       |           |       |relu      |
+|FC           |10  |       |           |       |softmax   |
+
+
+Note: 
+    - Batch Normalization is used instead of LRN introduced in the paper
+    - Normalization is applied into the first and the second conv layer as stated in the paper
 
 
 3. 
