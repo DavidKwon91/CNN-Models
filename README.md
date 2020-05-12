@@ -138,7 +138,7 @@ The structure of NIN model for cifar10 dataset as an example would be
 
 |Structure                 | Layers               |
 |:------------------------:|:--------------------:|
-|Input (32 x 32 RGB)       |Input                 |
+|Input                     |Input(32 x 32 RGB)    |
 |mlpconv layers 1 (BN, Act)|Conv5-192 (filters : 192, kernel : 5)     |
 |                          |Conv1-160             |
 |                          |Conv1-96              |
@@ -251,10 +251,41 @@ Note: For structure of customized Xception, you will be structuring modules call
 
 ![x](images/xception.PNG)
 
+* Simple code implementation
+
+```python
+#original Xception model
+xcp_org = xception(input_shape = (299, 299, 3), y_shape = 1000, num_class = 1000, activation = 'relu')
+
+#define each flow and connect along with the flow
+entry_flow = xcp_org.define_flow(filters = [128, 256, 728], flow = 'entry')
+middle_flow = xcp_org.define_flow(filters = [728], flow = 'middle', prev_flow = entry_flow)
+exit_flow = xcp_org.define_flow(filters = [728, 1024, 1536, 2048], flow = 'exit', 
+                                prev_flow = middle_flow)
+
+xception_original_model = xcp_org.build_model(flow = exit_flow)
+````
+
+
 
 * Customized mini version of Xception was implemented in the code
 
 Reference : [Mini Xception](https://github.com/beinanwang/tf-slim-xception-cifar-10)
+
+```python
+#Customized Xception model, which is small version
+
+xcp_mini = xception(input_shape = (32,32,3), y_shape = 1, num_class = 10, activation = 'relu')
+
+#define flow without middle flow and with downsampling
+entry_flow = xcp_mini.define_flow(filters = [128, 256, 728], flow = 'entry', downsample_strides = 1)
+exit_flow = xcp_mini.define_flow(filters = [728,1024,1536,2048], prev_flow = entry_flow, flow = 'exit')
+
+
+xcp_mini_model = xcp_mini.build_model(exit_flow)
+```
+
+
 
 
 ## Resnet
