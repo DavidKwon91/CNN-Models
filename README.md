@@ -300,9 +300,26 @@ resnet30_ver2.build_custom_resnet(filter_structure = [16,64,128], filter_structu
 
 * Input
 
-|Input (32 x 32 RGB image)|
-|:-----------------------:|
-|conv3-16, stride 1 (BN1)  |
+|                    |Input (32 x 32 RGB image)|        | 
+|:------------------:|:-----------------------:|:------:|
+|                    |conv3-16, stride 1       |        |
+|                    |BN1                      |        |
+|                    |Act1                     |        |
+|c1 3x3, 16 (BN, Act)|                         |        |
+|c2 3x3, 16 (BN)     |                         |        |
+|                    |Add1 (c2, Act1)          |        |
+|                    |Act2                     |        |
+|c1 3x3, 16 (BN, Act)|                         |        |
+|c2 3x3, 16 (BN)     |                         |        |
+|                    |Add2 (c2, Act2)          |        |
+|                    |Act3                     |        |
+|c1 3x3, 32 (BN, Act)|                         |identity Conv1 1x1, 32 strides 2|
+|c2 3x3, 32 (BN)     |                         |                                |
+|                    |Add3 (c2, identity Conv1)|        |
+
+
+
+
 
 
 * First Residual Modules (3 x 3, 16), which is the very first of first residual module
@@ -329,10 +346,6 @@ The residual module right after the first conv layer.
 
 * First Residual Modules (3 x 3, 32), where the filter is changed from 16 to 32
 
-|Add2 (the end of the second residual modules 16)|
-|:----------------------------------------------:|
-|Ac3 (Add2)                                      |
-|
 
 |                | Add2 (the end of the second residual modules 16)|       |
 |:--------------:|:-----------------------------------------------:|:-----:|      
