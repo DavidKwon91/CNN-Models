@@ -11,6 +11,10 @@ They are developed with Keras.
 
 # Models
 
+1. [Lenet](#Lenet)
+2. [Alexnet](#Alexnet)
+
+## Lenet
 1. Lenet
 * [Lenet Paper](http://yann.lecun.com/exdb/publis/pdf/lecun-01a.pdf)
 
@@ -127,8 +131,6 @@ Note:
 The structure of NIN model for cifar10 dataset as an example would be
 
 
-
-
 |Structure               | Layers           |
 |:----------------------:|:----------------:|
 |Input (32 x 32 RGB)     |Input             |
@@ -138,11 +140,16 @@ The structure of NIN model for cifar10 dataset as an example would be
 |                        |MaxPooling (96-3) |
 |                        |Dropout(0.5)      |
 |mlpconv layers 2 (BN, Act)|Conv2 (192-5)     |
-|                        |Conv2 (192-5)     |
-|                        |Conv2 (192-5)     |
+|                        |Conv2 (192-1)     |
+|                        |Conv2 (192-1)     |
 |                        |MaxPooling (192-3)|
 |                        |Dropout(0.5)      |
 |mlpconv layers 3 (BN, Act)|Conv2 (192-3)     |
 |                        |Conv2 (192-1)     |
 |                        |Global Avg Pooling |
 |                        |Activation (Softmax)|
+
+
+
+
+4. 
