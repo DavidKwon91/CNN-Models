@@ -277,21 +277,6 @@ Note: You can build various Resnets with the module, such as from Resnet18 to Re
 [Keras Resnet Implementation](https://keras.io/examples/cifar10_resnet/)
 
 
-* This is the same model with the version 1 in Keras implementation
-
-```python
-resnet30 = resnet(input_shape = (32,32,3), y_shape = 1, activation = 'relu', num_class = 10, kernel_regularizer = keras.regularizers.l2(weight_decay), kernel_initializer = 'he_normal')
-
-resnet30.build_custom_resnet(filter_structure = [16, 32, 64], structure_stack = [3,3,3], start_filter = 16, start_kernel = 3, start_strides = 1)
-```
-
-* This is the same model with the version 2 in the Keras implementation
-
-```python
-resnet30_ver2 = resnet(input_shape = (32,32,3), y_shape = 1, activation = 'relu', num_class = 10, kernel_regularizer = keras.regularizers.l2(weight_decay), kernel_initializer = 'he_normal')
-
-resnet30_ver2.build_custom_resnet(filter_structure = [16,64,128], filter_structure2 = [64, 128, 256], structure_stack = [3,3,3], start_filter = 16, start_kernel = 3, start_strides = 1)
-```
 
 * Version 1 Residual Module : stacks of (3 x 3) - (3 x 3)
 
@@ -311,8 +296,8 @@ resnet30_ver2.build_custom_resnet(filter_structure = [16,64,128], filter_structu
 |c2 3x3, 16 (BN)     |                         |        |
 |                    |Add2 (c2, Act2)          |        |
 |                    |Act3                     |        |
-|c1 3x3, 32 (BN, Act)|                         |identity c1 1x1, 32 strides 2|
-|c2 3x3, 32 (BN)     |                         |        |
+|c1 3x3, 32 (BN, Act)|                         |        |
+|c2 3x3, 32 (BN)     |                         |identity c1 1x1, 32 strides 2 (from Act3)|
 |                    |Add3 (c2, identity c1)   |        |
 |                    |Act4                     |        |
 |c1 3x3, 32 (BN, Act)|                         |        |
@@ -320,6 +305,16 @@ resnet30_ver2.build_custom_resnet(filter_structure = [16,64,128], filter_structu
 |                    |Add4 (c2, Act4)          |        |
 
 And so on.. 
+
+* This is the same model with the version 1 in Keras implementation
+
+```python
+resnet30 = resnet(input_shape = (32,32,3), y_shape = 1, activation = 'relu', num_class = 10, kernel_regularizer = keras.regularizers.l2(weight_decay), kernel_initializer = 'he_normal')
+
+resnet30.build_custom_resnet(filter_structure = [16, 32, 64], structure_stack = [3,3,3], start_filter = 16, start_kernel = 3, start_strides = 1)
+```
+
+
 
 * Version 2 Residual Module : stacks of (1 x 3 x 1), known as bottleneck layer
 
@@ -336,7 +331,8 @@ In the [paper](https://arxiv.org/pdf/1603.05027.pdf), the location of BN and Act
 |c2 3 x 3, 16 (BN, Act)|                           |        |
 |c3 1 x 1, 64          |                           |identity c1 1 x 1, 64 strides 2 (from Act1)|
 |                      |Add1 (c3, identity c1), 64 |        |
-|                      |BN2, Act2                  |        |
+|BN2                   |                           |        |
+|Act2                  |                           |        |
 |c1 1 x 1, 16 (BN, Act)|                           |        |
 |c2 3 x 3, 16 (BN, Act)|                           |        |
 |c3 1 x 1, 64          |                           |        |
@@ -350,3 +346,11 @@ In the [paper](https://arxiv.org/pdf/1603.05027.pdf), the location of BN and Act
 And so on.. 
 
 Notice the location of the BatchNormalization and Activation layers in the modules. 
+
+* This is the same model with the version 2 in the Keras implementation
+
+```python
+resnet30_ver2 = resnet(input_shape = (32,32,3), y_shape = 1, activation = 'relu', num_class = 10, kernel_regularizer = keras.regularizers.l2(weight_decay), kernel_initializer = 'he_normal')
+
+resnet30_ver2.build_custom_resnet(filter_structure = [16,64,128], filter_structure2 = [64, 128, 256], structure_stack = [3,3,3], start_filter = 16, start_kernel = 3, start_strides = 1)
+```
