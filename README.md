@@ -318,7 +318,7 @@ resnet30.build_custom_resnet(filter_structure = [16, 32, 64], structure_stack = 
 
 * Version 2 Residual Module : stacks of (1 x 3 x 1), known as bottleneck layer
 
-* Example : (1 x 3 x 1, (16, 64)) - (1 x 3 x 1, (64, 128)), Input 32 x 32 RGB
+* Example : (1 x 3 x 1, (16, 64)) x 2 - (1 x 3 x 1, (64, 128)) x 2, Input 32 x 32 RGB
 
 In the [paper](https://arxiv.org/pdf/1603.05027.pdf), the location of BN and Activation layer in the bottleneck layers were importantly discussed.
 
@@ -329,7 +329,7 @@ In the [paper](https://arxiv.org/pdf/1603.05027.pdf), the location of BN and Act
 |                      |Act1                       |        |
 |c1 1 x 1, 16 (BN, Act)|                           |        |
 |c2 3 x 3, 16 (BN, Act)|                           |        |
-|c3 1 x 1, 64          |                           |identity c1 1 x 1, 64 strides 2 (from Act1)|
+|c3 1 x 1, 64          |                           |identity c1 1 x 1, 64 strides 1 (from Act1)|
 |                      |Add1 (c3, identity c1), 64 |        |
 |BN2                   |                           |        |
 |Act2                  |                           |        |
@@ -337,11 +337,18 @@ In the [paper](https://arxiv.org/pdf/1603.05027.pdf), the location of BN and Act
 |c2 3 x 3, 16 (BN, Act)|                           |        |
 |c3 1 x 1, 64          |                           |        |
 |                      |Add2 (c3, Add1), 64        |        |
-|BN3, Act3             |                           |        |
-|c1 1 x 1, 64 (BN, Act)|                           |        |
+|BN3                   |                           |        |
+|Act3                  |                           |        |
+|c1 1 x 1, 64 (BN, Act) strides 2|                 |        |
 |c2 3 x 3, 64 (BN, Act)|                           |        |
 |c3 1 x 1, 128         |                           |identity c2 1 x 1, 128 strides 2 (from Add2)|
 |                      |Add3 (c3, identity c2), 128|        |
+|BN4                   |                           |        |
+|Act4                  |                           |        |
+|c1 1 x 1, 64 (BN, Act)|                           |        |
+|c2 3 x 3, 64 (BN, Act)|                           |        |
+|c3 1 x 1, 128          |                          |        |
+|                      |Add2 (c3, Add3), 128       |        |
 
 And so on.. 
 
