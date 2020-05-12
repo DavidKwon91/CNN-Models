@@ -131,18 +131,18 @@ The structure of NIN model for cifar10 dataset as an example would be
 
 |Structure               | Layers           |
 |:----------------------:|:----------------:|
-|                 Input (32 x 32 RGB)
+|Input (32 x 32 RGB)     |                  |
 |mlpconv layers (BN, Act)|Conv2 (192-5)     |
-                          Conv2 (160-1)
-                          Conv2 (96-1)
-|                         MaxPooling (96-3) |
-                          Dropout(0.5)
+|                        |Conv2 (160-1)     |
+|                        |Conv2 (96-1)      |
+|                        |MaxPooling (96-3) |
+|                        |Dropout(0.5)      |
 |mlpconv layers (BN, Act)|Conv2 (192-5)     |
-                          Conv2 (192-5)
-                          Conv2 (192-5)
-|                         MaxPooling (192-3)|
-                          Dropout(0.5)
+|                        |Conv2 (192-5)     |
+|                        |Conv2 (192-5)     |
+|                        |MaxPooling (192-3)|
+|                        |Dropout(0.5)      |
 |mlpconv layers (BN, Act)|Conv2 (192-3)     |
-                          Conv2 (192-1)
-|                         Global Avg Pooling|
-|                          Activation       |
+|                        |Conv2 (192-1)     |
+|                        |Global Avg Pooling |
+|                        |Activation (Softmax)|
