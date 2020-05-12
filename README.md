@@ -13,7 +13,7 @@ They are developed with Keras.
 
 1. [Lenet](#Lenet)
 2. [Alexnet](#Alexnet)
-3. [NIN](#Network In Network)
+3. [Network In Network](#NIN)
 4. [VGG](#VGG)
 5. [GoogLeNet](#GoogLeNet)
 6. [Xception](#Xception)
@@ -100,7 +100,7 @@ The input shape that is stated in the paper is 224 x 224 x 3, but it must be 227
 Note: Batch Normalization is used instead of LRN introduced in the paper at the first and the second conv layer. 
 Dropout : 0.5
 
-## Network In Network
+## NIN
 
 * [Network In Network Paper](https://arxiv.org/pdf/1312.4400.pdf)
 
@@ -325,6 +325,11 @@ resnet30.build_custom_resnet(filter_structure = [16, 32, 64], structure_stack = 
 * Example : (1 x 3 x 1, (16, 64)) x 2 - (1 x 3 x 1, (64, 128)) x 2, Input 32 x 32 RGB
 
 In the [paper](https://arxiv.org/pdf/1603.05027.pdf), the location of BN and Activation layer in the bottleneck layers were importantly discussed.
+
+* Full pre-activation
+
+![r](resnet_preact.PNG)
+
 
 |                      |Input (32 x 32 RGB image)  |             | 
 |:--------------------:|:-------------------------:|:-----------:|
