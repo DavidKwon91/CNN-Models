@@ -195,8 +195,30 @@ The structure of each versions are defined as below:
 |Conv3-512   |Conv3-512   |Conv3-512   |Conv3-512   |
 |            |            |Conv3-512   |Conv3-512   |
 |            |            |            |Conv3-512   |
-|Max pooling |Max pooling ||Max pooling|Max pooling |
+|Max pooling |Max pooling |Max pooling|Max pooling |
 |FC-4096     |FC-4096     |FC-4096     |FC-4096     |
 |FC-4096     |FC-4096     |FC-4096     |FC-4096     |
 |FC-1000     |FC-1000     |FC-1000     |FC-1000     |
 |Activation(Softmax)|Activation(Softmax)|Activation(Softmax)|Activation(Softmax)|
+
+
+
+
+## GoogLeNet
+
+* [GoogLeNet paper](https://arxiv.org/pdf/1409.4842.pdf)
+
+* You can customize..
+    - activation
+    - weight initializer
+    - regularizer
+    - optimizer
+
+* Two versions of Googlenet available
+    1. Orginial version
+    2. Mini version
+
+Note: Mini version is structured as stated in the paper, [Mini Googlenet](https://arxiv.org/pdf/1611.03530.pdf)
+
+
+![Googlenet](C:\Users\husie\Desktop\Googlenet_model.png)
