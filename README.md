@@ -293,14 +293,54 @@ resnet30_ver2 = resnet(input_shape = (32,32,3), y_shape = 1, activation = 'relu'
 resnet30_ver2.build_custom_resnet(filter_structure = [16,64,128], filter_structure2 = [64, 128, 256], structure_stack = [3,3,3], start_filter = 16, start_kernel = 3, start_strides = 1)
 ```
 
-* Version 1 Residual Module Architecture Example
+* Version 1 Residual Module : stacks of (3 x 3) - (3 x 3)
+
+* Example : (3 x 3, 16) x 2 - (3 x 3, 32) x 2 , Input 32x32 RGB
 
 
-|       |BatchNormalization(if first layer of first block) or Add(the end of module) |    |
-|:--------------:|:---------------------------------------:|:-----:|                 
-|                |Activation (from previous layer)         |       |
-|c1 3x3 (BN, Act)|                                         |identity conv 1x1, strides 2|
-|c2 3x3 (BN)     |                                         |       |
-|                |  Add(c2, Activation from top of module) |       |
+* Input
 
+|Input (32 x 32 RGB image)|
+|:-----------------------:|
+|conv3-16, stride 1 (BN1)  |
+
+
+* First Residual Modules (3 x 3, 16), which is the very first of first residual module
+The residual module right after the first conv layer. 
+
+|BatchNormalization (BN1)   |
+|:-------------------------:|               
+|Act1   (BN1)               |
+|c1 3x3, 16 (BN, Act)       |
+|c2 3x3, 16 (BN)            |
+|Add1 (c2, Act1)            |
+ 
+
+
+* Second Residual Modules (3 x 3, 16)
+
+|Add1 (the end of the first residual modules module 16) |
+|:--------------------------------:|               
+|Act2 (Add1)                       |
+|c1 3x3, 16 (BN, Act)              |
+|c2 3x3, 16 (BN)                   |
+|Add2 (c2, Act2)                   |
+
+
+* First Residual Modules (3 x 3, 32), where the filter is changed from 16 to 32
+
+|Add2 (the end of the second residual modules 16)|
+|:----------------------------------------------:|
+|Ac3 (Add2)                                      |
+|
+
+|                | Add2 (the end of the second residual modules 16)|       |
+|:--------------:|:-----------------------------------------------:|:-----:|      
+|                |Act3 (Add2)                                      |       |
+|c1 3x3, 32 (BN, Act)|                      |identity Conv1 1x1, 32 strides 2|
+|c2 3x3, 32 (BN)     |                      |                               |
+|                |  Add3 (c2, identity Conv1)       |       |
+
+
+And so on..
 
