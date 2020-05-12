@@ -19,17 +19,17 @@ They are developed with Keras.
     
 * Original Architecture
 
-|Layer           |Maps   |Size   |Kernel Size|
-|----------------|:-----:|:-----:|:---------:|
-|input           |1      |32 x 32|           |
-|Conv1           |6      |28 x 28|5 x 5      |
-|Avg Pooling2D   |6      |14 x 14|2 x 2      |
-|Conv2           |16     |10 x 10|5 x 5      |
-|Avg Pooling2D   |16     |5 x 5  |2 x 2      |
-|Conv2           |120    |1 x 1  |5 x 5      |
-|Flatten         |120    |120    |           |
-|Dense           |84     |84     |           |
-|Dense           |10     |10     |           |
+|Layer           |Maps   |Size   |Kernel Size|stride |Activation|
+|----------------|:-----:|:-----:|:---------:|:-----:|:--------:|
+|Input           |1      |32 x 32|           |       |          |
+|Conv1           |6      |28 x 28|5 x 5      |1      |tanh      |
+|Avg Pooling2D   |6      |14 x 14|2 x 2      |2      |          |
+|Conv2           |16     |10 x 10|5 x 5      |1      |tanh      |
+|Avg Pooling2D   |16     |5 x 5  |2 x 2      |2      |          |
+|Conv2           |120    |1 x 1  |5 x 5      |1      |tanh      |
+|Flatten         |120    |120    |           |       |          |
+|Dense           |84     |84     |           |       |tanh      |
+|Dense           |10     |10     |           |       |softmax   |
 
 
 2. Alexnet
