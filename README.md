@@ -8,7 +8,7 @@ They are developed with Keras.
 # Models
 
 1. Lenet
-* [Lenet](http://yann.lecun.com/exdb/publis/pdf/lecun-01a.pdf)
+* [Lenet Paper](http://yann.lecun.com/exdb/publis/pdf/lecun-01a.pdf)
 
 * You can customize..
     - activation
@@ -19,17 +19,17 @@ They are developed with Keras.
     
 * Original Architecture
 
-|Layer           |Maps   |
-|----------------|:-----:|
-|input           |1      |
-|Conv1           |6      |
-|Avg Pooling2D   |6      |
-|Conv2           |16     |
-|Avg Pooling2D   |16     |
-|Flatten         |16     |
-|Dense           |120    |
-|Dense           |84     |
-|Dense           |10     |
+|Layer           |Maps   |Size   |Kernel Size|
+|----------------|:-----:|:-----:|:---------:|
+|input           |1      |32 x 32|           |
+|Conv1           |6      |28 x 28|5 x 5      |
+|Avg Pooling2D   |6      |14 x 14|2 x 2      |
+|Conv2           |16     |10 x 10|5 x 5      |
+|Avg Pooling2D   |16     |5 x 5  |2 x 2      |
+|Conv2           |120    |1 x 1  |5 x 5      |
+|Flatten         |120    |120    |           |
+|Dense           |84     |84     |           |
+|Dense           |10     |10     |           |
 
 
 2. Alexnet
