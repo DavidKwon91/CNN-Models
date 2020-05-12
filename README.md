@@ -13,7 +13,7 @@ They are developed with Keras.
 
 1. [Lenet](#Lenet)
 2. [Alexnet](#Alexnet)
-3. [Network In Network](#Network In Network)
+3. [NIN](#Network In Network)
 4. [VGG](#VGG)
 5. [GoogLeNet](#GoogLeNet)
 6. [Xception](#Xception)
@@ -173,26 +173,30 @@ The structure of each versions are defined as below:
 
 
 
-|Versions |      11    |  13        |  16        |  19        |
-|:-------:|:----------:|:----------:|:----------:|:----------:|
-|         |Conv3-64    |Conv3-64    |Conv3-64    |Conv3-64    |
-|         |            |Conv3-64    |Conv3-64    |Conv3-64    |
-|         |Max pooling |Max pooling |Max pooling |Max pooling |
-|         |Conv3-128   |Conv3-128   |Conv3-128   |Conv3-128   |
-|         |            |Conv3-128   |Conv3-128   |Conv3-128   |
-|         |Max Pooling |Max Pooling |Max pooling |Max pooling |
-|         |Conv3-256   |Conv3-256   |Conv3-256   |Conv3-256   |
-|         |Conv3-256   |Conv3-256   |Conv3-256   |Conv3-256   |
-|         |            |            |Conv3-256   |Conv3-256   |
-|         |            |            |            |Conv3-256   |
-|         |Max Pooling |Max Pooling |Max pooling |Max pooling |
-|         |Conv3-512   |Conv3-512   |Conv3-512   |Conv3-512   |
-|         |Conv3-512   |Conv3-512   |Conv3-512   |Conv3-512   |
-|         |            |            |Conv3-512   |Conv3-512   |
-|         |            |            |            |Conv3-512   |
-|         |Max Pooling |Max Pooling |Max pooling |Max pooling |
-|         |Conv3-512   |Conv3-512   |Conv3-512   |Conv3-512   |
-|         |Conv3-512   |Conv3-512   |Conv3-512   |Conv3-512   |
-|         |            |            |Conv3-512   |Conv3-512   |
-|         |            |            |            |Conv3-512   |
-|         |            |            |Max pooling |Max pooling |
+|      11    |  13        |  16        |  19        |
+|:----------:|:----------:|:----------:|:----------:|
+|Conv3-64    |Conv3-64    |Conv3-64    |Conv3-64    |
+|            |Conv3-64    |Conv3-64    |Conv3-64    |
+|Max pooling |Max pooling |Max pooling |Max pooling |
+|Conv3-128   |Conv3-128   |Conv3-128   |Conv3-128   |
+|            |Conv3-128   |Conv3-128   |Conv3-128   |
+|Max Pooling |Max Pooling |Max pooling |Max pooling |
+|Conv3-256   |Conv3-256   |Conv3-256   |Conv3-256   |
+|Conv3-256   |Conv3-256   |Conv3-256   |Conv3-256   |
+|            |            |Conv3-256   |Conv3-256   |
+|            |            |            |Conv3-256   |
+|Max Pooling |Max Pooling |Max pooling |Max pooling |
+|Conv3-512   |Conv3-512   |Conv3-512   |Conv3-512   |
+|Conv3-512   |Conv3-512   |Conv3-512   |Conv3-512   |
+|            |            |Conv3-512   |Conv3-512   |
+|            |            |            |Conv3-512   |
+|Max Pooling |Max Pooling |Max pooling |Max pooling |
+|Conv3-512   |Conv3-512   |Conv3-512   |Conv3-512   |
+|Conv3-512   |Conv3-512   |Conv3-512   |Conv3-512   |
+|            |            |Conv3-512   |Conv3-512   |
+|            |            |            |Conv3-512   |
+|Max pooling |Max pooling ||Max pooling|Max pooling |
+|FC-4096     |FC-4096     |FC-4096     |FC-4096     |
+|FC-4096     |FC-4096     |FC-4096     |FC-4096     |
+|FC-1000     |FC-1000     |FC-1000     |FC-1000     |
+|Activation(Softmax)|Activation(Softmax)|Activation(Softmax)|Activation(Softmax)|
