@@ -362,6 +362,8 @@ And so on..
 
 Notice the location of the BatchNormalization and Activation layers in the modules. 
 
+
+
 * This is the same model with the version 2 in the Keras implementation
 
 ```python
