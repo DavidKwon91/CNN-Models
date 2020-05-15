@@ -175,6 +175,17 @@ class mobilenet_v2():
         #Returns
         
             model (Model) : Keras model instance, compiled
+            
+            
+        #Examples
+        
+            mb2 = mobilenet_v2(...)
+            mb2.build_model(c = [16, 24, 32, 64, 96, 160, 320],
+                                t = [1, 6, 6, 6, 6, 6, 6],
+                                s = [1, 2, 2, 2, 1, 2, 1],
+                                n = [1, 2, 3, 4, 3, 3, 1], 
+                                out_filters = 1280, downsample = True, alpha = 1.0, dropout = 0.25)
+            mb2.model.summary()
         ------------------------------------------------------------------------------
         """
 
