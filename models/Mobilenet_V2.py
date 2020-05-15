@@ -10,6 +10,7 @@ from keras import backend as K
 
 
 #reference
+#https://arxiv.org/pdf/1801.04381.pdf - original paper
 #https://github.com/keras-team/keras-applications/blob/master/keras_applications/mobilenet_v2.py
 #https://github.com/xiaochus/MobileNetV2/blob/master/mobilenet_v2.py
 
