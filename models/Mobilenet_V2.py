@@ -159,7 +159,7 @@ class mobilenet_v2():
         """
         ------------------------------------------------------------------------------
         #Arguments
-        For t, c, n, and s, it's exactly the same as the paper stated.
+        For t, c, n, and s, it's exactly the same with the Table 2 in the paper.
         
             t (int list) : int list for the expansion factor - for pointwise convolution filters, "The exapansion factor is applied to the input size"
             c (int list) : int list for the output channels of each blocks - the out filters of convoltuion layers of each blocks, "All layers in the same sequence have the same number of c of ouput channels"
