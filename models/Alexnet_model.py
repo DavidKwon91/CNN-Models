@@ -7,10 +7,7 @@ from keras.models import Sequential, Model
 from keras.layers import Conv2D, Dense, Flatten, Activation, MaxPooling2D, AveragePooling2D, GlobalAveragePooling2D
 from keras.layers import Input, concatenate, Dropout, BatchNormalization, add, Layer
 from keras.preprocessing.image import ImageDataGenerator
-from keras.callbacks import LearningRateScheduler
 from keras import backend as K
-from keras.datasets import cifar10
-import time
 
 
 #Alexnet - including original and mini version of Alexnet
@@ -47,14 +44,14 @@ class alexnet():
         
         
     @staticmethod
-    def maxpool(*, prev_layers = None, pool_size = 2, strides = 2, padding = 'valid'):
+    def _maxpool(*, prev_layers = None, pool_size = 2, strides = 2, padding = 'valid'):
         #pool size is 2 by default as used in the paper
         if prev_layers is None:
             return MaxPooling2D(pool_size = pool_size, strides = strides)
         else:
             return MaxPooling2D(pool_size = pool_size, strides = strides)(prev_layers)
         
-    def conv_def(self, filters, *, prev_layers = None, kernel_size = 3, strides = 1, padding = 'same', input_shape = None, bn = False):
+    def _conv_def(self, filters, *, prev_layers = None, kernel_size = 3, strides = 1, padding = 'same', input_shape = None, bn = False):
         
         if input_shape is not None:
             input_layers = Input(shape = self.input_shape)
@@ -81,17 +78,30 @@ class alexnet():
         
     #"Response-normalization layers follow the first and second convolutional layers."
     
-    #mini - for mini version of Alexnet
+    
     def build_model(self, *, mini = False):
         
+        """
+        ------------------------------------------------------------------------------
+        #Arguments
+
+            mini (boolean) : boolean value for which model version is used among original version and mini version of Alexnet
+
+        #Returns
+
+            model (Model) : Keras model instance, compiled
+        ------------------------------------------------------------------------------
+
+        """
+        
         if mini:
-            x = self.conv_def(filters = 64, strides = 2, input_shape = self.input_shape, bn = True)
-            x = self.maxpool(prev_layers = x)
-            x = self.conv_def(filters = 192, prev_layers = x, bn = True)
-            x = self.maxpool(prev_layers = x)
-            x = self.conv_def(filters = 256, prev_layers = x)
-            x = self.conv_def(filters = 256, prev_layers = x)
-            x = self.maxpool(prev_layers = x)
+            x = self._conv_def(filters = 64, strides = 2, input_shape = self.input_shape, bn = True)
+            x = self._maxpool(prev_layers = x)
+            x = self._conv_def(filters = 192, prev_layers = x, bn = True)
+            x = self._maxpool(prev_layers = x)
+            x = self._conv_def(filters = 256, prev_layers = x)
+            x = self._conv_def(filters = 256, prev_layers = x)
+            x = self._maxpool(prev_layers = x)
             
             x = Flatten()(x)
             x = Dense(512, activation = self.activation)(x)
@@ -102,14 +112,14 @@ class alexnet():
             
         #original alexnet
         else:
-            x = self.conv_def(filters = 96, kernel_size = 11, strides = 4, padding = 'valid', input_shape = self.input_shape, bn = True)
-            x = self.maxpool(prev_layers = x) #padding = valid
-            x = self.conv_def(filters = 256, kernel_size = 5, prev_layers = x, bn = True)
-            x = self.maxpool(prev_layers = x)
-            x = self.conv_def(filters = 384, prev_layers = x)
-            x = self.conv_def(filters = 384, prev_layers = x)
-            x = self.conv_def(filters = 256, prev_layers = x)
-            x = self.maxpool(prev_layers = x)
+            x = self._conv_def(filters = 96, kernel_size = 11, strides = 4, padding = 'valid', input_shape = self.input_shape, bn = True)
+            x = self._maxpool(prev_layers = x) #padding = valid
+            x = self._conv_def(filters = 256, kernel_size = 5, prev_layers = x, bn = True)
+            x = self._maxpool(prev_layers = x)
+            x = self._conv_def(filters = 384, prev_layers = x)
+            x = self._conv_def(filters = 384, prev_layers = x)
+            x = self._conv_def(filters = 256, prev_layers = x)
+            x = self._maxpool(prev_layers = x)
             
             x = Flatten()(x)
             x = Dense(4096, activation = self.activation)(x)
@@ -127,7 +137,7 @@ class alexnet():
         else:
             loss = 'categorical_crossentropy'
             
-        model.compile(loss = loss, optimizer=  opt, metrics = ['accuracy'])
+        model.compile(loss = loss, optimizer = opt, metrics = ['accuracy'])
         
         self.model = model
         

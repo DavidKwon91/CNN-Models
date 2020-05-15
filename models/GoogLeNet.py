@@ -7,9 +7,7 @@ from keras.models import Sequential, Model
 from keras.layers import Conv2D, Dense, Flatten, Activation, MaxPooling2D, AveragePooling2D, GlobalAveragePooling2D
 from keras.layers import Input, concatenate, Dropout, BatchNormalization, add, Layer
 from keras.preprocessing.image import ImageDataGenerator
-from keras.callbacks import LearningRateScheduler
 from keras import backend as K
-from keras.datasets import cifar10
 
 
 
@@ -50,7 +48,7 @@ class googlenet():
         datagen.fit(X_train)
         self.datagen = datagen
         
-    def conv_def(self, filters, kernel_size, *, strides = 1, prev_layers = None):
+    def _conv_def(self, filters, kernel_size, *, strides = 1, prev_layers = None):
         x = Conv2D(filters = filters, kernel_size = kernel_size, strides = strides, padding = self.padding,
                   kernel_initializer = self.ki, kernel_regularizer = self.kr)(prev_layers)
         x = BatchNormalization()(x)
@@ -58,33 +56,38 @@ class googlenet():
         
         return x
     
-    def Inception(self, prev_layers, conv1_1, conv13_1, conv13_3, conv15_1, conv15_5, convp1_1):
-        conv11_l = self.conv_def(filters = conv1_1, kernel_size = 1, prev_layers = prev_layers)
+    def _Inception(self, prev_layers, conv1_1, conv13_1, conv13_3, conv15_1, conv15_5, convp1_1):
         
-        conv13_l = self.conv_def(filters = conv13_1, kernel_size = 1, prev_layers = prev_layers)
-        conv13_3_l = self.conv_def(filters = conv13_3, kernel_size = 3, prev_layers = conv13_l)
+        #(1 x 1)
+        conv11_l = self._conv_def(filters = conv1_1, kernel_size = 1, prev_layers = prev_layers)
         
-        conv15_l = self.conv_def(filters = conv15_1, kernel_size = 1, prev_layers = prev_layers)
-        conv15_5_l = self.conv_def(filters = conv15_5, kernel_size = 5, prev_layers = conv15_l)
+        #(1 x 3)
+        conv13_l = self._conv_def(filters = conv13_1, kernel_size = 1, prev_layers = prev_layers)
+        conv13_3_l = self._conv_def(filters = conv13_3, kernel_size = 3, prev_layers = conv13_l)
         
+        #(1 x 5)
+        conv15_l = self._conv_def(filters = conv15_1, kernel_size = 1, prev_layers = prev_layers)
+        conv15_5_l = self._conv_def(filters = conv15_5, kernel_size = 5, prev_layers = conv15_l)
+        
+        #(1 x pool)
         convp1_l = MaxPooling2D(pool_size = 3, strides = 1, padding = self.padding)(prev_layers)
-        convp1_1_l = self.conv_def(filters = convp1_1, kernel_size = 1, prev_layers = convp1_l)
+        convp1_1_l = self._conv_def(filters = convp1_1, kernel_size = 1, prev_layers = convp1_l)
         
         inception_out = concatenate([conv11_l, conv13_3_l, conv15_5_l, convp1_1_l], axis = -1)
         
         return inception_out
     
     def mini_Inception(self, prev_layers, conv1_1, conv3_1):
-        conv11 = self.conv_def(filters = conv1_1, kernel_size = 1, prev_layers = prev_layers)
-        conv33 = self.conv_def(filters = conv3_1, kernel_size = 3, prev_layers = prev_layers)
+        conv11 = self._conv_def(filters = conv1_1, kernel_size = 1, prev_layers = prev_layers)
+        conv33 = self._conv_def(filters = conv3_1, kernel_size = 3, prev_layers = prev_layers)
         
         inception_out = concatenate([conv11, conv33], axis = -1)
         
         return inception_out
     
-    def downsample(self, prev_layers, filters):
+    def _downsample(self, prev_layers, filters):
         
-        conv33 = self.conv_def(filters = filters, kernel_size = 3, strides = 2, prev_layers = prev_layers)
+        conv33 = self._conv_def(filters = filters, kernel_size = 3, strides = 2, prev_layers = prev_layers)
         pool = MaxPooling2D(pool_size = 3, strides = 2, padding = 'same')(prev_layers)
         
         downsample_out = concatenate([conv33, pool], axis = -1)
@@ -93,38 +96,58 @@ class googlenet():
     
     def build_model(self, *, mini = False):
         
+        """
+        ------------------------------------------------------------------------------
+        #Arguments
+        
+            mini (boolean) : boolean value to specify which version of googlenet is built among original and mini version of googlenet
+            
+            
+        #Returns
+        
+            model (Model) : Keras model instance, compiled
+            
+        
+        
+        Orgiginal version - https://arxiv.org/pdf/1409.4842.pdf
+        mini version - https://arxiv.org/pdf/1611.03530.pdf - Figure 3
+        ------------------------------------------------------------------------------
+        
+        """
+        
+        
         input_layers = Input(shape = self.input_shape)
         
         if mini is False:
             
-            conv1 = self.conv_def(filters = 64, kernel_size = 7, strides = 2, prev_layers = input_layers)
+            conv1 = self._conv_def(filters = 64, kernel_size = 7, strides = 2, prev_layers = input_layers)
             conv1_pool = MaxPooling2D(pool_size = 3, strides = 2, padding = 'same')(conv1)
             
-            conv2_1 = self.conv_def(filters = 64, kernel_size = 1, strides = 1, prev_layers = conv1_pool)
-            conv2 = self.conv_def(filters = 192, kernel_size = 3, strides = 1, prev_layers = conv2_1)
+            conv2_1 = self._conv_def(filters = 64, kernel_size = 1, strides = 1, prev_layers = conv1_pool)
+            conv2 = self._conv_def(filters = 192, kernel_size = 3, strides = 1, prev_layers = conv2_1)
             conv2_pool = MaxPooling2D(pool_size = 3, strides = 2, padding = 'same')(conv2)
             
-            inception_3a = self.Inception(prev_layers = conv2_pool,
+            inception_3a = self._Inception(prev_layers = conv2_pool,
                                          conv1_1 = 64, conv13_1 = 96, conv13_3 = 128, conv15_1 = 16, conv15_5 = 32, convp1_1 = 32)
-            inception_3b = self.Inception(prev_layers = inception_3a,
+            inception_3b = self._Inception(prev_layers = inception_3a,
                                          conv1_1 = 128, conv13_1 = 128, conv13_3 = 192, conv15_1 = 32, conv15_5 = 96, convp1_1 = 64)
             inception_3_pool = MaxPooling2D(pool_size = 3, strides = 2, padding = 'same')(inception_3b)
             
-            inception_4a = self.Inception(inception_3_pool,
+            inception_4a = self._Inception(inception_3_pool,
                                          192, 96, 208, 16, 48, 64)
-            inception_4b = self.Inception(inception_4a,
+            inception_4b = self._Inception(inception_4a,
                                          160, 112, 224, 24, 64, 64)
-            inception_4c = self.Inception(inception_4b,
+            inception_4c = self._Inception(inception_4b,
                                          128, 128, 256, 24, 64, 64)
-            inception_4d = self.Inception(inception_4c,
+            inception_4d = self._Inception(inception_4c,
                                          112, 144, 144, 32, 64, 64)
-            inception_4e = self.Inception(inception_4d,
+            inception_4e = self._Inception(inception_4d,
                                          256, 160, 320, 32, 128, 128)
             inception_4_pool = MaxPooling2D(pool_size = 3, strides = 2, padding = 'same')(inception_4e)
             
-            inception_5a = self.Inception(inception_4_pool,
+            inception_5a = self._Inception(inception_4_pool,
                                          256, 160, 320, 32, 128, 128)
-            inception_5b = self.Inception(inception_5a,
+            inception_5b = self._Inception(inception_5a,
                                          384, 192, 384, 48, 128, 128)
             
             inception_avgpool = AveragePooling2D(pool_size = 7, strides = 1)(inception_5b)
@@ -133,29 +156,29 @@ class googlenet():
             
         if mini:
             
-            conv1 = self.conv_def(filters = 96, kernel_size = 3, prev_layers = input_layers)
+            conv1 = self._conv_def(filters = 96, kernel_size = 3, prev_layers = input_layers)
             
-            inception_3a = self.mini_Inception(prev_layers = conv1,
+            inception_3a = self._mini_Inception(prev_layers = conv1,
                                               conv1_1 = 32, conv3_1 = 32)
-            inception_3b = self.mini_Inception(inception_3a,
+            inception_3b = self._mini_Inception(inception_3a,
                                               32, 48)
             
-            downsample_1 = self.downsample(prev_layers = inception_3b, filters = 80)
+            downsample_1 = self._downsample(prev_layers = inception_3b, filters = 80)
             
-            inception_4a = self.mini_Inception(downsample_1,
+            inception_4a = self._mini_Inception(downsample_1,
                                               112, 48)
-            inception_4b = self.mini_Inception(inception_4a,
+            inception_4b = self._mini_Inception(inception_4a,
                                               96, 64)
-            inception_4c = self.mini_Inception(inception_4b,
+            inception_4c = self._mini_Inception(inception_4b,
                                               80, 80)
-            inception_4d = self.mini_Inception(inception_4c,
+            inception_4d = self._mini_Inception(inception_4c,
                                               48, 96)
             
-            downsample_2 = self.downsample(inception_4d, 96)
+            downsample_2 = self._downsample(inception_4d, 96)
             
-            inception_5a = self.mini_Inception(downsample_2,
+            inception_5a = self._mini_Inception(downsample_2,
                                               176, 160)
-            inception_5b = self.mini_Inception(inception_5a,
+            inception_5b = self._mini_Inception(inception_5a,
                                               176, 160)
             
             inception_avgpool = AveragePooling2D(pool_size = 7, strides = 1)(inception_5b)
@@ -222,12 +245,31 @@ googlenet_org.build_model(mini = False)
 googlenet_org.model.summary()
 
 #mini googlenet - input 32 x 32 RGB
-googlenet_mini = googlenet(input_shape = (32,32,3), y_shape = 1, activation = 'relu', num_class = 10)
+googlenet_mini = googlenet(input_shape = (32,32,3), y_shape = 10, activation = 'relu', num_class = 10,
+                          epochs = 5)
 googlenet_mini.build_model(mini = True)
 googlenet_mini.model.summary()
 
 
+(X_train_full, y_train_full), (X_test, y_test) = keras.datasets.cifar10.load_data()
+
+X_train, X_valid = X_train_full[:-5000], X_train_full[-5000:]
+y_train, y_valid = y_train_full[:-5000], y_train_full[-5000:]
+
+y_train = keras.utils.to_categorical(y_train, 10)
+y_valid = keras.utils.to_categorical(y_valid, 10)
+y_test = keras.utils.to_categorical(y_test, 10)
+
+X_train = X_train.astype('float32')
+X_valid = X_valid.astype('float32')
+X_test = X_test.astype('float32')
+
+X_mean = X_train.mean(axis=0, keepdims=True)
+X_std = X_train.std(axis=0, keepdims = True)
+X_train = (X_train - X_mean) / X_std
+X_valid = (X_valid - X_mean) / X_std
+X_test = (X_test - X_mean) / X_std
 #fitting and predicting
-#googlenet_mini.fit(X_train = X_train, y_train = y_train, X_valid = X_valid, y_valid = y_valid)
+googlenet_mini.fit(X_train = X_train, y_train = y_train, X_valid = X_valid, y_valid = y_valid)
 #googlenet_mini.evaluate(X_valid = X_valid, y_valid = y_valid)
 #googlenet_mini.predict(X_new = X_test)

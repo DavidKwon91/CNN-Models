@@ -7,9 +7,7 @@ from keras.models import Sequential, Model
 from keras.layers import Conv2D, Dense, Flatten, Activation, MaxPooling2D, AveragePooling2D, GlobalAveragePooling2D
 from keras.layers import Input, concatenate, Dropout, BatchNormalization, add, Layer
 from keras.preprocessing.image import ImageDataGenerator
-from keras.callbacks import LearningRateScheduler
 from keras import backend as K
-from keras.datasets import cifar10
 
 
 #simple Network In Network with 3 mlpconv layers
@@ -96,7 +94,7 @@ class NIN():
         datagen.fit(X_train)
         self.datagen = datagen
         
-    def conv_def(self, filters, kernel_size, prev_layers, *, padding = 'same'):
+    def _conv_def(self, filters, kernel_size, prev_layers, *, padding = 'same'):
         x = Conv2D(filters = filters, kernel_size = kernel_size, padding = padding,
                   kernel_initializer = self.ki,
                   kernel_regularizer = self.kr)(prev_layers)
@@ -107,27 +105,53 @@ class NIN():
     
     def mlpconv(self, filters_structure, first_kernel, *, prev_layers = None, first = False, out = False):
         
+        """
+        ------------------------------------------------------------------------------
+        #Arguments
+        You should structure the model by structuring the mlpconv layers with this function. 
+        
+            filters_structure (list or tuple) : int list or tuple for the structure of each mlpconv
+            first_kernel (int) : int value for the kernel size of the first convolution layers in a mlpconv layers, all other kernel size is 1
+            prev_layers (Keras layer instance) : Keras layer instance to connect to the previous mlpconv
+            first (boolean) : boolean to structure whether the first or onwards mlpconv
+            out (boolean) : boolean to structure whether the out mlpconv layers or not
+            
+        #Returns 
+        
+            layers (Layer) : Keras layer instance
+        
+        
+        #Example
+        
+            nin = NIN(...) #... Arguments to instantiate NIN class
+            first_mlpconv = nin.mlpconv(filters_structure = [192, 160, 96], first_kernel = 5, first = True)
+            second_mlpconv = nin.mlpconv(filters_structure = [192, 192, 192], first_kernel = 5, prev_layers = first_mlpconv)
+            out_mlpconv = nin.mlpconv(filters_structure = [192, 192], first_kernel = 3, out = True, prev_layers = second_mlpconv)
+            ...
+        ------------------------------------------------------------------------------
+        """
+        
         if first:
             input_layers = Input(shape = self.input_shape)
             
-            x = self.conv_def(filters = filters_structure[0], kernel_size = first_kernel, prev_layers = input_layers)
-            x = self.conv_def(filters = filters_structure[1], kernel_size = 1, prev_layers = x)
-            x = self.conv_def(filters = filters_structure[2], kernel_size = 1, prev_layers = x)
+            x = self._conv_def(filters = filters_structure[0], kernel_size = first_kernel, prev_layers = input_layers)
+            x = self._conv_def(filters = filters_structure[1], kernel_size = 1, prev_layers = x)
+            x = self._conv_def(filters = filters_structure[2], kernel_size = 1, prev_layers = x)
             
             self.input_layers = input_layers
         
         if first is False:
             if out:
-                x = self.conv_def(filters = filters_structure[0], kernel_size = first_kernel, prev_layers = prev_layers)
-                x = self.conv_def(filters = filters_structure[1], kernel_size = 1, prev_layers = x)
-                x = self.conv_def(filters = self.num_class, kernel_size = 1, prev_layers = x)
+                x = self._conv_def(filters = filters_structure[0], kernel_size = first_kernel, prev_layers = prev_layers)
+                x = self._conv_def(filters = filters_structure[1], kernel_size = 1, prev_layers = x)
+                x = self._conv_def(filters = self.num_class, kernel_size = 1, prev_layers = x)
                 x = GlobalAveragePooling2D()(x)
                 x = Activation('softmax')(x)
                 
             else:
-                x = self.conv_def(filters = filters_structure[0], kernel_size = first_kernel, prev_layers = prev_layers)
-                x = self.conv_def(filters = filters_structure[1], kernel_size = 1, prev_layers = x)
-                x = self.conv_def(filters = filters_structure[2], kernel_size = 1, prev_layers = x)
+                x = self._conv_def(filters = filters_structure[0], kernel_size = first_kernel, prev_layers = prev_layers)
+                x = self._conv_def(filters = filters_structure[1], kernel_size = 1, prev_layers = x)
+                x = self._conv_def(filters = filters_structure[2], kernel_size = 1, prev_layers = x)
             
         if out is False:
             x = MaxPooling2D(pool_size = 3, strides = 2, padding = 'same')(x)
@@ -138,6 +162,19 @@ class NIN():
         return x
         
     def build_model(self, *, mlpconv = None):
+        
+        """
+        ------------------------------------------------------------------------------
+        #Arguments
+        
+            mlpconv (Keras layer instance) : Keras layer instance, which is structured with mlpconv function
+            
+        #Returns
+        
+            model (Model) : Keras model instance, compiled
+        ------------------------------------------------------------------------------
+        
+        """
         
         if self.input_layers is None:
             raise ValueError("Please initialize the first mlpconv")
@@ -190,6 +227,8 @@ class NIN():
         pred = self.model.predict(X_new)
         return pred
 
+    
+    
 #customized version 1 (mini version)
 nin = NIN(input_shape = (32,32,3), y_shape = 1, activation = 'relu', num_class = 10)
 first_mlpconv = nin.mlpconv(filters_structure = [192, 160, 96], first_kernel = 5, first = True)

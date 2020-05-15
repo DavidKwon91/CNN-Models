@@ -7,15 +7,7 @@ from keras.models import Sequential, Model
 from keras.layers import Conv2D, Dense, Flatten, Activation, MaxPooling2D, AveragePooling2D, GlobalAveragePooling2D
 from keras.layers import Input, concatenate, Dropout, BatchNormalization, add, Layer
 from keras.preprocessing.image import ImageDataGenerator
-
-from keras.callbacks import LearningRateScheduler
 from keras import backend as K
-from keras.utils import plot_model
-
-from keras.datasets import cifar10
-
-
-
 
 
 
@@ -57,14 +49,14 @@ class resnet():
         
         
     @staticmethod
-    def maxpool(x):
+    def _maxpool(x):
         return MaxPooling2D(pool_size = 3, strides = 2, padding = self.padding)(x)
     
     @staticmethod
-    def bn_def(x):
+    def _bn_def(x):
         return BatchNormalization(momentum = 0.9, epsilon = 1e-5)(x)
     
-    def conv_def(self, filters, kernel_size, *, strides = 1, x = None, **kwargs):
+    def _conv_def(self, filters, kernel_size, *, strides = 1, x = None, **kwargs):
         
         x = Conv2D(filters = filters, kernel_size = kernel_size, padding = self.padding, strides = strides,
                   kernel_initializer = self.ki, kernel_regularizer = self.kr, **kwargs)(x)
@@ -72,7 +64,7 @@ class resnet():
         return x
     
     
-    def residual2(self, filters, prev_layers, *, first = False, first_of_first = False):
+    def _residual2(self, filters, prev_layers, *, first = False, first_of_first = False):
         '''Residual module for [3 x 3]'''
         
         a1 = Activation(self.activation)(prev_layers)
@@ -80,7 +72,7 @@ class resnet():
         #first layer but not the first block
         if first:
             strides = 2
-            shortcut = self.conv_def(filters = filters, kernel_size = 1, strides = strides, x = a1)
+            shortcut = self._conv_def(filters = filters, kernel_size = 1, strides = strides, x = a1)
             
         #second layer and onwards
         if first is False:
@@ -90,29 +82,29 @@ class resnet():
         #very first layer of the first block
         if first_of_first:
             strides = 1
-            a1 = Activation(self.activation)(self.bn_def(x = prev_layers))
+            a1 = Activation(self.activation)(self._bn_def(x = prev_layers))
             shortcut = a1
         
-        c1 = self.conv_def(filters = filters, kernel_size = 3, strides = strides, x = a1)
-        a2 = Activation(self.activation)(self.bn_def(x = c1))
-        c2 = self.conv_def(filters = filters, kernel_size = 3, strides = 1, x = a2)
-        c2 = self.bn_def(x = c2)
+        c1 = self._conv_def(filters = filters, kernel_size = 3, strides = strides, x = a1)
+        a2 = Activation(self.activation)(self._bn_def(x = c1))
+        c2 = self._conv_def(filters = filters, kernel_size = 3, strides = 1, x = a2)
+        c2 = self._bn_def(x = c2)
 
         block = add([c2, shortcut])
 
         return block
     
     
-    def residual3(self, filter1, filter2, prev_layers, *, first = False, first_of_first = False):
+    def _residual3(self, filter1, filter2, prev_layers, *, first = False, first_of_first = False):
         '''Residual Module for [1 x 3 x 1]'''
         
         
-        a1 = Activation(self.activation)(self.bn_def(x = prev_layers))
+        a1 = Activation(self.activation)(self._bn_def(x = prev_layers))
         
         #first layer but not the first block
         if first:
             strides = 2
-            shortcut = self.conv_def(filters = filter2, kernel_size = 1, strides = strides, x = prev_layers)
+            shortcut = self._conv_def(filters = filter2, kernel_size = 1, strides = strides, x = prev_layers)
             
         #second layer and onwards
         if first is False:
@@ -122,55 +114,55 @@ class resnet():
         #very first layer of the first block
         if first_of_first:
             strides = 1
-            shortcut = self.conv_def(filters = filter2, kernel_size = 1, strides = strides, x = a1)
+            shortcut = self._conv_def(filters = filter2, kernel_size = 1, strides = strides, x = a1)
             
         
-        c1 = self.conv_def(filters = filter1, kernel_size = 1, strides = strides, x = a1)
-        a2 = Activation(self.activation)(self.bn_def(x = c1))
-        c2 = self.conv_def(filters = filter1, kernel_size = 3, strides = 1, x = a2)
+        c1 = self._conv_def(filters = filter1, kernel_size = 1, strides = strides, x = a1)
+        a2 = Activation(self.activation)(self._bn_def(x = c1))
+        c2 = self._conv_def(filters = filter1, kernel_size = 3, strides = 1, x = a2)
         
-        a3 = Activation(self.activation)(self.bn_def(x = c2))
-        c3 = self.conv_def(filters = filter2, kernel_size = 1, strides = 1, x = a3)
+        a3 = Activation(self.activation)(self._bn_def(x = c2))
+        c3 = self._conv_def(filters = filter2, kernel_size = 1, strides = 1, x = a3)
         
         block = add([c3, shortcut]) 
         
         return block
     
     
-    def residual_structure(self, filter_structure, prev_layers, structure_stack, *, 
+    def _residual_structure(self, filter_structure, prev_layers, structure_stack, *, 
                            filter_structure2 = None, res3 = False):
         
         #[3 x 3]
         if res3 is False:
             
             #Very virst layer of the first residual blocks, which the strides is 1
-            x = self.residual2(filters = filter_structure[0], prev_layers = prev_layers, first_of_first = True)
+            x = self._residual2(filters = filter_structure[0], prev_layers = prev_layers, first_of_first = True)
             #from the second layer of the first residual block
             for i in range(1, structure_stack[0]):
-                x = self.residual2(filters = filter_structure[0], prev_layers = x)
+                x = self._residual2(filters = filter_structure[0], prev_layers = x)
                 
                 
             #from second block and onwards, which the strides of the first layer is 2
             for f,s in zip(filter_structure[1:], structure_stack[1:]):
-                x = self.residual2(filters = f, prev_layers = x, first = True)
+                x = self._residual2(filters = f, prev_layers = x, first = True)
                 #stride is 1
                 for k in range(1, s):
-                    x = self.residual2(filters = f, prev_layers = x)
+                    x = self._residual2(filters = f, prev_layers = x)
         
         #[1 x 3 x 1]
         if res3:
             
             
             #Very virst layer of the first residual blocks, which the strides is 1
-            x = self.residual3(filter1 = filter_structure[0], filter2 = filter_structure2[0], prev_layers = prev_layers, first_of_first = True)
+            x = self._residual3(filter1 = filter_structure[0], filter2 = filter_structure2[0], prev_layers = prev_layers, first_of_first = True)
             for i in range(1, structure_stack[0]):
-                x = self.residual3(filter1 = filter_structure[0], filter2 = filter_structure2[0], prev_layers = x)
+                x = self._residual3(filter1 = filter_structure[0], filter2 = filter_structure2[0], prev_layers = x)
             
             #from second block and onwards, which the strides of the first layer is 2
             for f1, f2, s in zip(filter_structure[1:], filter_structure2[1:], structure_stack[1:]):
-                x = self.residual3(filter1 = f1, filter2 = f2, prev_layers = x, first= True)
+                x = self._residual3(filter1 = f1, filter2 = f2, prev_layers = x, first= True)
                 for k in range(1,s):
-                    x = self.residual3(filter1 = f1, filter2 = f2, prev_layers = x)
+                    x = self._residual3(filter1 = f1, filter2 = f2, prev_layers = x)
                 
         return x
     
@@ -179,7 +171,7 @@ class resnet():
                             filter_structure2 = None, start_filter = 64 , start_kernel = 7, start_strides = 2):
         
         """
-        
+        ------------------------------------------------------------------------------
         #Arguments
         
             filter_structure (list or tuple): int list for the filters in the residual module
@@ -191,7 +183,7 @@ class resnet():
         
         #Returns
             
-            model (Model) : Keras model instance
+            model (Model) : Keras model instance, compiled
         
         
         ex1) filter_structure = [16,32,64], structure_stack = [5,5,5]
@@ -213,28 +205,27 @@ class resnet():
         6 resnet module [1 x 3 x 1] (3 x 6 = 18 layers), filters are 256, 256, and 1024 respectively.
         3 resnet module [1 x 3 x 1] (3 x 3 = 9 layers), filters are 512, 512, and 2048 respectively.
         1 FC
-        
-        
+        ------------------------------------------------------------------------------
         
         """
         
         input_layers = Input(shape = self.input_shape)
         
         
-        conv1 = self.conv_def(filters = start_filter, kernel_size = start_kernel,
+        conv1 = self._conv_def(filters = start_filter, kernel_size = start_kernel,
                              strides = start_strides, x = input_layers)
         
         #small resnet [3 x 3]
         if filter_structure2 is None:
-            x = self.residual_structure(filter_structure = filter_structure, prev_layers = conv1, 
+            x = self._residual_structure(filter_structure = filter_structure, prev_layers = conv1, 
                                         structure_stack = structure_stack, res3 = False)
             final_act = Activation(self.activation)(x)
         
         #deep resnet [1 x 3 x 1] bottleneck layers
         if filter_structure2 is not None:
-            x = self.residual_structure(filter_structure = filter_structure, filter_structure2 = filter_structure2, 
+            x = self._residual_structure(filter_structure = filter_structure, filter_structure2 = filter_structure2, 
                                         prev_layers = conv1, structure_stack = structure_stack, res3 = True)
-            final_bn = self.bn_def(x = x)
+            final_bn = self._bn_def(x = x)
             final_act = Activation(self.activation)(final_bn)
         
         global_pool = GlobalAveragePooling2D()(final_act)
@@ -330,7 +321,7 @@ resnet_ver1.model.summary()
 
 #version 2 [1 x 3 x 1]
 #Total layers : 9 * n + 2 for n = 3      == 29
-resnet_ver2 = resnet(input_shape = (32,32,3), y_shape = 1, activation = 'relu', num_class = 10, kernel_regularizer = keras.regularizers.l2(weight_decay), kernel_initializer = 'he_normal')
+resnet_ver2 = resnet(input_shape = (32,32,3), y_shape = 10, activation = 'relu', num_class = 10, kernel_regularizer = keras.regularizers.l2(weight_decay), kernel_initializer = 'he_normal')
 resnet_ver2.build_custom_resnet(filter_structure = [16,64,128], filter_structure2 = [64, 128, 256], structure_stack = [3,3,3], start_filter = 16, start_kernel = 3, start_strides = 1)
 
 resnet_ver2.model.summary()

@@ -7,10 +7,7 @@ from keras.models import Sequential, Model
 from keras.layers import Conv2D, Dense, Flatten, Activation, MaxPooling2D, AveragePooling2D, GlobalAveragePooling2D
 from keras.layers import Input, concatenate, Dropout, BatchNormalization, add, Layer
 from keras.preprocessing.image import ImageDataGenerator
-from keras.callbacks import LearningRateScheduler
 from keras import backend as K
-from keras.datasets import cifar10
-
 
 
 class vgg():
@@ -53,7 +50,7 @@ class vgg():
         datagen.fit(X_train)
         self.datagen = datagen
         
-    def structure_layers(self, structure):
+    def _structure_layers(self, structure):
         
         layers = [Conv2D(filters = 64, kernel_size = 3, padding = self.padding, input_shape = self.input_shape,
                         kernel_initializer = self.ki, kernel_regularizer = self.kr),
@@ -73,28 +70,41 @@ class vgg():
         return layers
         
     def build_model(self, vgg_version = '19'):
+        
+        """
+        ------------------------------------------------------------------------------
+        #Arguments
+        
+            vgg_version (string) : string value to specify which version of VGG model is structured
+        
+        #Returns
+        
+            model (Model) : Keras model instance, compiled
+        ------------------------------------------------------------------------------
+        """
+        
         if vgg_version not in self.vgg_version:
             raise ValueError(vgg_version + ', this vgg version is not available')
 
         if vgg_version == '11':
             structure = ['M',128,'M',256,256,'M',512,512,'M',512,512,'M']
 
-            model = Sequential(self.structure_layers(structure))
+            model = Sequential(self._structure_layers(structure))
 
         if vgg_version == '13':
             structure = [64, 'M',128,128,'M',256,256,'M',512,512,'M',512,512,'M']
 
-            model = Sequential(self.structure_layers(structure))
+            model = Sequential(self._structure_layers(structure))
 
         if vgg_version == '16':
             structure = [64, 'M',128,128,'M',256,256,256,'M',512,512,512,'M',512,512,512,'M']
 
-            model = Sequential(self.structure_layers(structure))
+            model = Sequential(self._structure_layers(structure))
 
         if vgg_version == '19':
             structure = [64,'M',128,128,'M',256,256,256,256,'M',512,512,512,512,'M',512,512,512,512,'M']
 
-            model = Sequential(self.structure_layers(structure))
+            model = Sequential(self._structure_layers(structure))
 
 
         model.add(Flatten())

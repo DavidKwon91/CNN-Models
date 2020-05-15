@@ -7,12 +7,8 @@ from keras.models import Sequential, Model
 from keras.layers import Conv2D, Dense, Flatten, Activation, MaxPooling2D, AveragePooling2D, GlobalAveragePooling2D
 from keras.layers import Input, concatenate, Dropout, BatchNormalization, add, Layer, SeparableConv2D
 from keras.preprocessing.image import ImageDataGenerator
-
-from keras.callbacks import LearningRateScheduler
 from keras import backend as K
-from keras.utils import plot_model
 
-from keras.datasets import cifar10
 #reference
 #https://github.com/beinanwang/tf-slim-xception-cifar-10
 
@@ -55,45 +51,42 @@ class xception():
         self.datagen = datagen
         
     @staticmethod
-    def maxpool(x, *, strides = 2):
+    def _maxpool(x, *, strides = 2):
         return MaxPooling2D(pool_size = 3, strides = strides, padding = 'same')(x)
     
     @staticmethod
-    def bn_def(x):
+    def _bn_def(x):
         return BatchNormalization(momentum = 0.9, epsilon = 1e-5)(x)
     
     #convolution layer for convenient uses
-    def conv_def(self, filters, *, kernel_size = 3, strides = 1, x = None, **kwargs):
+    def _conv_def(self, filters, *, kernel_size = 3, strides = 1, x = None, **kwargs):
         
         x = Conv2D(filters = filters, kernel_size = kernel_size, padding = self.padding, strides = strides,
                   kernel_initializer = self.ki, kernel_regularizer = self.kr, **kwargs)(x)
-        x = self.bn_def(x = x)
-        #x = Activation(self.Activation)(x)
+        x = self._bn_def(x = x)
         
         return x
     
     #seperable conv layer for convenient uses
-    def sep_conv_def(self, filters, *, kernel_size = 3, strides = 1, x = None, last=False, **kwargs):
+    def _sep_conv_def(self, filters, *, kernel_size = 3, strides = 1, x = None, last=False, **kwargs):
         
         if last:
             x = SeparableConv2D(filters = filters, kernel_size = kernel_size, strides = strides, padding = self.padding,
                            kernel_initializer = self.ki, kernel_regularizer = self.kr, **kwargs)(x)
-            x = self.bn_def(x = x)
+            x = self._bn_def(x = x)
         
         else:
             x = SeparableConv2D(filters = filters, kernel_size = kernel_size, strides = strides, padding = self.padding,
                            kernel_initializer = self.ki, kernel_regularizer = self.kr, **kwargs)(x)
-            x = self.bn_def(x = x)
+            x = self._bn_def(x = x)
             x = Activation(self.activation)(x)
         
         return x
     
     
     
-    
-    
     #flow structure function
-    def xception_flow(self, filters, prev_layers, *, flow = 'entry', middleflow_stack = 8, downsample_strides = 2):
+    def _xception_flow(self, filters, prev_layers, *, flow = 'entry', middleflow_stack = 8, downsample_strides = 2):
 
         if len(filters) == 1 and flow != 'middle':
             raise ValueError("You need different filters for each modules in the flow, unless you are structuring middle flow")
@@ -114,34 +107,34 @@ class xception():
                 raise ValueError('You need 3 filters for each modules in the entry flow')
 
             #1
-            shortcut = self.conv_def(filters = filters[0], kernel_size = 1, strides = downsample_strides, 
+            shortcut = self._conv_def(filters = filters[0], kernel_size = 1, strides = downsample_strides, 
                                      use_bias = False, x = prev_layers)
 
-            x = self.sep_conv_def(filters = filters[0], use_bias = False, x = prev_layers)
-            x = self.sep_conv_def(filters = filters[0], last = True, use_bias = False, x = x)
-            x = self.maxpool(x = x, strides = downsample_strides)
+            x = self._sep_conv_def(filters = filters[0], use_bias = False, x = prev_layers)
+            x = self._sep_conv_def(filters = filters[0], last = True, use_bias = False, x = x)
+            x = self._maxpool(x = x, strides = downsample_strides)
 
             block = add([x, shortcut])
 
             #2
-            shortcut = self.conv_def(filters = filters[1], kernel_size = 1, strides = downsample_strides, 
+            shortcut = self._conv_def(filters = filters[1], kernel_size = 1, strides = downsample_strides, 
                                      use_bias = False, x = block)
 
             x = Activation(self.activation)(block)
-            x = self.sep_conv_def(filters = filters[1], use_bias = False, x = x)
-            x = self.sep_conv_def(filters = filters[1], last = True, use_bias = False, x = x)
-            x = self.maxpool(x = x, strides = downsample_strides)
+            x = self._sep_conv_def(filters = filters[1], use_bias = False, x = x)
+            x = self._sep_conv_def(filters = filters[1], last = True, use_bias = False, x = x)
+            x = self._maxpool(x = x, strides = downsample_strides)
 
             block = add([x,shortcut])
 
             #3
-            shortcut = self.conv_def(filters = filters[2], kernel_size = 1, strides = 2, 
+            shortcut = self._conv_def(filters = filters[2], kernel_size = 1, strides = 2, 
                                      use_bias = False, x = block)
 
             x = Activation(self.activation)(block)
-            x = self.sep_conv_def(filters = filters[2], use_bias = False, x = x)
-            x = self.sep_conv_def(filters = filters[2], last = True, use_bias = False, x = x)
-            x = self.maxpool(x = x)
+            x = self._sep_conv_def(filters = filters[2], use_bias = False, x = x)
+            x = self._sep_conv_def(filters = filters[2], last = True, use_bias = False, x = x)
+            x = self._maxpool(x = x)
 
             flow_out = add([x,shortcut])
 
@@ -154,17 +147,17 @@ class xception():
             #repeat 8 times as stated in the paper
             
             x = Activation(self.activation)(prev_layers)
-            x = self.sep_conv_def(filters = filters, x = x, use_bias = False)
-            x = self.sep_conv_def(filters = filters, x = x, use_bias = False)
-            x = self.sep_conv_def(filters = filters, x = x, last = True, use_bias = False)
+            x = self._sep_conv_def(filters = filters, x = x, use_bias = False)
+            x = self._sep_conv_def(filters = filters, x = x, use_bias = False)
+            x = self._sep_conv_def(filters = filters, x = x, last = True, use_bias = False)
             x = add([x, shortcut])
             
             for i in range(1, middleflow_stack):
                 shortcut = x
                 x = Activation(self.activation)(shortcut)
-                x = self.sep_conv_def(filters = filters, x = x, use_bias = False)
-                x = self.sep_conv_def(filters = filters, x = x, use_bias = False)
-                x = self.sep_conv_def(filters = filters, x = x, last = True, use_bias = False)
+                x = self._sep_conv_def(filters = filters, x = x, use_bias = False)
+                x = self._sep_conv_def(filters = filters, x = x, use_bias = False)
+                x = self._sep_conv_def(filters = filters, x = x, last = True, use_bias = False)
                 flow_out = add([x, shortcut])
 
 
@@ -173,26 +166,43 @@ class xception():
             if len(filters) != 4:
                 raise ValueError("You need 4 filters for each modules in exit flow")
 
-            shortcut = self.conv_def(filters = filters[1], kernel_size = 1, strides = 2, 
+            shortcut = self._conv_def(filters = filters[1], kernel_size = 1, strides = 2, 
                                      use_bias = False, x = prev_layers)
 
             x = Activation(self.activation)(prev_layers)
-            x = self.sep_conv_def(filters = filters[0], x = x, use_bias = False)
-            x = self.sep_conv_def(filters = filters[1], x = x, last = True, use_bias = False)
+            x = self._sep_conv_def(filters = filters[0], x = x, use_bias = False)
+            x = self._sep_conv_def(filters = filters[1], x = x, last = True, use_bias = False)
 
-            x = self.maxpool(x = x)
+            x = self._maxpool(x = x)
 
             block = add([x, shortcut])
 
             #the last module
-            x = self.sep_conv_def(filters = filters[2], x = x, use_bias = False)
+            x = self._sep_conv_def(filters = filters[2], x = x, use_bias = False)
 
-            flow_out = self.sep_conv_def(filters = filters[3], x = x, use_bias = False)
+            flow_out = self._sep_conv_def(filters = filters[3], x = x, use_bias = False)
 
 
         return flow_out
     
     def define_flow(self, filters, flow, *, prev_flow = None, downsample_strides = 2):
+        
+        
+        """
+        ------------------------------------------------------------------------------
+        #Arguments
+        
+            filters (list or tuple) : int list or tuple for the structure of the filters of convolution layers in each flows
+            flow (string) : string value to specify which flow is built among, 'entry', 'middle', and 'exit'
+            prev_flow (Layer) : Keras layer instance, which is the flow layers
+            downsample_strides (int) : int value for the strides in the first two conv and maxpooling layers in the entry flow
+                This can be 1 in small version of xception
+        
+        #Returns
+        
+            layer (Layer) : Keras layer instance, which is the flow
+        ------------------------------------------------------------------------------
+        """
         
         if flow == 'entry':
             
@@ -201,26 +211,51 @@ class xception():
             #the first module
             
             #32 x 32 x 32
-            x = self.conv_def(32, strides = 1, use_bias = False, x = input_layers)
+            x = self._conv_def(32, strides = 1, use_bias = False, x = input_layers)
             x = Activation(self.activation)(x)
             
             #32 x 32
-            x = self.conv_def(64, use_bias = False, x = x)
+            x = self._conv_def(64, use_bias = False, x = x)
             x = Activation(self.activation)(x)
             
-            x = self.xception_flow(filters = filters, prev_layers = x, flow = 'entry',
+            x = self._xception_flow(filters = filters, prev_layers = x, flow = 'entry',
                                    downsample_strides = downsample_strides)
             
             self.input_layers = input_layers
             
         else:
             
-            x = self.xception_flow(filters = filters, flow = flow, prev_layers = prev_flow)
+            x = self._xception_flow(filters = filters, flow = flow, prev_layers = prev_flow)
             
         return x
         
         
     def build_model(self, flow):
+        
+        
+        """
+        ------------------------------------------------------------------------------
+        #Arguments
+        
+            flow (Layer) : Keras layer instance, which is one of flows as stated in paper; entry, middle, and exit flow
+            
+        #Returns
+        
+            model (Model) : Keras model instance, compiled
+            
+            
+        Before structure the whole model, the flows must be structured first with define_flow function
+        
+        #Example
+            
+            xcp = xception(...) #instantiate xception class
+            entry_flow = xcp.define_flow(filters = [128, 256, 728], flow = 'entry')
+            middle_flow = xcp.define_flow(filters = [728], flow = 'middle', prev_flow = entry_flow)
+            exit_flow = xcp.define_flow(filters = [728, 1024, 1536, 2048], flow = 'exit', prev_flow = middle_flow)
+            xcp_model = xcp.build_model(flow = exit_flow)
+            ...
+        ------------------------------------------------------------------------------
+        """
         
         if flow is None:
             raise ValueError("You need the flow of Xception model")
@@ -310,3 +345,38 @@ xcp_mini_model = xcp_mini.build_model(exit_flow)
 
 
 
+
+(X_train_full, y_train_full), (X_test, y_test) = keras.datasets.cifar10.load_data()
+
+X_train, X_valid = X_train_full[:-5000], X_train_full[-5000:]
+y_train, y_valid = y_train_full[:-5000], y_train_full[-5000:]
+
+y_train = keras.utils.to_categorical(y_train, 10)
+y_valid = keras.utils.to_categorical(y_valid, 10)
+y_test = keras.utils.to_categorical(y_test, 10)
+
+X_train = X_train.astype('float32')
+X_valid = X_valid.astype('float32')
+X_test = X_test.astype('float32')
+
+X_mean = X_train.mean(axis=0, keepdims=True)
+X_std = X_train.std(axis=0, keepdims = True)
+X_train = (X_train - X_mean) / X_std
+X_valid = (X_valid - X_mean) / X_std
+X_test = (X_test - X_mean) / X_std
+
+
+xcp_mini = xception(input_shape = X_train.shape[1:], y_shape = 10, num_class = 10, activation = 'relu',
+                   epochs = 5)
+
+#define flow
+entry_flow = xcp_mini.define_flow(filters = [128, 256, 728], flow = 'entry', downsample_strides = 1)
+exit_flow = xcp_mini.define_flow(filters = [728,1024,1536,2048], prev_flow = entry_flow, flow = 'exit')
+
+xcp_mini_model = xcp_mini.build_model(exit_flow)
+
+
+#fitting and predicting
+#xcp_mini.fit(X_train = X_train, y_train = y_train, X_valid = X_valid, y_valid = y_valid)
+#xcp_mini.evaluate(X_valid = X_valid, y_valid = y_valid)
+#xcp_mini.predict(X_new = X_test)

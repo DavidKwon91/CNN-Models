@@ -7,11 +7,7 @@ from keras.models import Sequential, Model
 from keras.layers import Conv2D, Dense, Flatten, Activation, MaxPooling2D, AveragePooling2D, GlobalAveragePooling2D
 from keras.layers import Input, concatenate, Dropout, BatchNormalization, add, Layer
 from keras.preprocessing.image import ImageDataGenerator
-from keras.callbacks import LearningRateScheduler
 from keras import backend as K
-from keras.datasets import cifar10
-import time
-
 
 #simple Lenet
 def simple_lenet(input_shape, num_class):
@@ -32,7 +28,6 @@ def simple_lenet(input_shape, num_class):
     
 simple_lenet(input_shape = (32,32,3), num_class = 10).summary()
 
-keras.utils.plot_model(simple_lenet(input_shape = (32,32,3), num_class = 10), show_shapes= True)
 
 #You can customize of the lenet model
 
@@ -67,9 +62,13 @@ class lenet():
         self.datagen = None
         
         
-    
+    def image_aug(self,X_train, **kwargs):
+        datagen = ImageDataGenerator(**kwargs)
+        datagen.fit(X_train)
+        self.datagen = datagen
+        
     @staticmethod
-    def maxpool(*, x = None, pool_size = 2, strides = 2):
+    def _maxpool(*, x = None, pool_size = 2, strides = 2):
         #pool size is 2 by default as used in the paper
         if x is None:
             return MaxPooling2D(pool_size = pool_size, strides = strides)
@@ -77,7 +76,7 @@ class lenet():
             return MaxPooling2D(pool_size = pool_size, strides = strides)(x)
     
     @staticmethod
-    def avgpool(*, x = None, pool_size = 2, strides = 2):
+    def _avgpool(*, x = None, pool_size = 2, strides = 2):
         #pool size is 2 by default as used in the paper
         if x is None:
             return AveragePooling2D(pool_size = pool_size, strides = strides)
@@ -85,7 +84,7 @@ class lenet():
             return AveragePooling2D(pool_size = pool_size, strides = strides)(x)
                 
     
-    def conv_def(self, filters, *,kernel_size = 5, strides = 1, input_shape = None, bn=False):
+    def _conv_def(self, filters, *,kernel_size = 5, strides = 1, input_shape = None, bn=False):
         #kernel size is 5 by default as used in the paper
         if input_shape is None:
             return Conv2D(filters = filters, kernel_size = kernel_size, strides = strides, 
@@ -95,30 +94,42 @@ class lenet():
             return Conv2D(filters = filters, kernel_size = kernel_size, strides = strides, 
                           padding = self.padding, kernel_initializer = self.ki, kernel_regularizer = self.kr, input_shape = input_shape)
        
-    def structure_layers(self, structure):
+    def _structure_layers(self, structure):
         
-        layers = [self.conv_def(filters = structure[0], input_shape = self.input_shape)]
+        layers = [self._conv_def(filters = structure[0], input_shape = self.input_shape)]
         
         for i in structure[1:]:
             if i == 'M':
-                layers += [self.maxpool()]
+                layers += [self._maxpool()]
             elif i == 'A':
-                layers += [self.avgpool()]
+                layers += [self._avgpool()]
             else:
-                layers += [self.conv_def(filters = i),
+                layers += [self._conv_def(filters = i),
                           Activation(self.activation)]
                 
         return layers
         
         
-    def image_aug(self,X_train, **kwargs):
-        datagen = ImageDataGenerator(**kwargs)
-        datagen.fit(X_train)
-        self.datagen = datagen
     
     def build_model(self, *, structure = (6, 'A', 16, 'A')):
         
-        model = Sequential(self.structure_layers(structure))
+        """
+        ------------------------------------------------------------------------------
+        #Arguments
+        
+            structure (list or tuple) : list or tuple for the structure of lenet.
+                int : filters of each convolution layers
+                'A' : Average pooling 2D
+                'M' : Max Pooling 2D
+                
+        #Return
+        
+            model (Model) : Keras model instance, compiled
+        ------------------------------------------------------------------------------
+        
+        """
+        
+        model = Sequential(self._structure_layers(structure))
         
         model.add(Flatten())
         model.add(Dense(120, activation = self.activation, kernel_initializer = self.ki, kernel_regularizer = self.kr))
@@ -136,6 +147,7 @@ class lenet():
         self.model = model
         
         return model
+    
     
     def fit(self, X_train, y_train, *, X_valid = None, y_valid = None):
         if X_valid is not None:
